@@ -1,0 +1,36 @@
+# Most end with '/'
+baseURL: 'https://foxfriday.github.io/'
+title: M. Rincón
+author: M. Rincón
+theme: asteriks
+languageCode: en-us
+copyright: M. Rincón
+
+params:
+  subtitle: Guided by asteriks
+
+markup:
+  highlight:
+    noClasses: false
+    lineNos: true
+
+menu:
+  main:
+  - name: Home
+    url: /
+    weight: 1
+  - name: Posts
+    url: posts/
+    weight: 2
+  - name: Tags
+    url: /tags
+    weight: 3
+  - name: Rss
+    url: /index.xml
+    weight: 4
+  - name: GitHub
+    url: https://github.com/foxfriday
+    weight: 5
+
+taxonomies:
+   tag: tags

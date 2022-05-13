@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- POST'S LIST -->
+<html>
+  {{ partial "header.html" . }}
+  <body>
+    <div class="container wrapper">
+      {{ partial "head.html" . }}
+      <div class="markdown">
+        <p>
+          You found a collection of post about things I find interesting,
+          things I used to find interesting, and things I thought I would
+          find interesting. I doubt you'll find much new here.
+        </p>
+        <h3 class="title">Colophon</h3>
+        <p>
+	  This website is built with <a href="https://gohugo.io/">Hugo</a>
+          and <a href="https://orgmode.org/">org-mode</a>. It is hosted at GitHub.
+          The theme is based on <a href="https://github.com/vividvilla/ezhil">Ezhil</a>.
+          The Fanwood and Raleway fonts come from
+          <a href="https://www.theleagueofmoveabletype.com">The League of Moveable Type</a>.
+          All bugs and other horrors are likely my fault.
+        </p>
+      </div>
+    {{ partial "footer.html" . }}
+  </body>
+</html>

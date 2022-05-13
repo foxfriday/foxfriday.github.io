@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  {{ partial "header.html" . }}
+
+  <body>
+    <div class="container wrapper list">
+      {{ partial "head.html" . }}
+
+      {{ if isset .Data "Term" }}
+      <h1>/"{{ .Data.Term }}"</h1>
+      {{ else }}
+      <h1 class="page-title"> ✱ </h1>
+      {{ end }}
+
+      {{ with .Content }}{{ . }}{{ end }}
+
+      <ul class="posts">
+	{{- range .Data.Pages -}}
+	{{- if (in (.Site.Params.excludedTypes | default (slice "page")) .Type) -}}
+	{{- else -}}
+        {{ $date := .Date.Format "2006-02.01" }}
+        {{ $lastmod := .Lastmod.Format "2006-02.01" }}
+	<div class="post">
+          <p>
+          <div class="meta">
+            {{ $date }}
+            {{ if ne $lastmod $date }}
+            <span class="modified-label">Revised: {{ $lastmod }}</span>
+            {{ end }}
+            {{ if .Draft }}
+            <span class="draft-label">DRAFT</span>
+            {{ end }}
+          </div>
+          <a class="title" href="{{ .RelPermalink }}">
+            {{.Title}}
+          </a>
+          -
+          <span class="description">
+            {{ if isset .Params "description" }}
+            {{ .Description }}
+            {{ else }}
+            {{ .Summary }}&hellip;
+            {{ end }}
+          </span>
+          </p>
+	</div>
+	{{- end -}}
+	{{- end -}}
+      </ul>
+    </div>
+
+    {{ partial "footer.html" . }}
+  </body>
+
+</html>

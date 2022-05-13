@@ -1,0 +1,25 @@
+<head>
+  <meta charset="utf-8" />
+  {{- $title := ( .Title ) -}}
+  {{- $siteTitle := ( .Site.Title ) -}}
+  {{- if .IsHome -}}
+  <title>{{ $siteTitle }} {{ if isset .Site.Params "subtitle" }}- {{ .Site.Params.Subtitle }}{{ end }} </title>
+  {{- else -}}
+  <title>{{ $title }} - {{ $siteTitle }}</title>
+  {{- end -}}
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- RSS -->
+  {{ with .OutputFormats.Get "rss" -}}
+  {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+  {{ end -}}
+  <!-- STYLE SHEETS -->
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ .Site.BaseURL }}css/light.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ .Site.BaseURL }}css/syntax.css" />
+
+  <!-- Math Support -->
+  {{ if .Params.mathjax }}
+  {{ partial "mathjax_support.html" . }}
+  {{ end }}
+</head>
