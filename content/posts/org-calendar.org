@@ -1,5 +1,6 @@
 #+title: Viewing Important Dates in Emacs
 #+date: 2022-05-16
+#+lastmod: 2022-05-17
 #+draft: false
 #+tags[]: emacs
 
@@ -21,26 +22,33 @@ For example, if I want to find the last work day of the month according to U.S.
 federal calendar, I can add this line to my diary:
 
 #+begin_src emacs-lisp
- %%(diary-expirations 1 -1) Last work day of the month
+ ;; -*- mode: diary; mode: auto-revert; -*-
+ %%(df-diary-expirations 1 -1) Last work day of the month
 #+end_src
 
 Or I can mark the last work day before the 25th of every month according to
 a different calendar:
 
 #+begin_src emacs-lisp
- %%(diary-expirations 25 -1 df-globex-holidays) First work day before the 25
+ %%(df-diary-expirations 25 -1 df-globex-holidays) Work day before the 25
 #+end_src
 
 Or something even more complicated, like finding the first work day on or before
 the 25th, and then mark the third work day before that day with a special color:
 
 #+begin_src emacs-lisp
- %%(diary-expirations 25 -3 df-globex-holidays t personal-face) Hello
+ %%(df-diary-expirations 25 -3 df-globex-holidays t personal-face) Hello
 #+end_src
 
 Now I can open the calendar with ~M-x calendar~, press ~m~ and the days that match
 the rule are colored with whatever color I choose. I can also press ~d~ and get
-some information on the date, in this case the string "Hello". And I can display
-the events in the fancy org-mode agenda along with holidays.
+some information on the date, in this case the string "Hello".
+
+To display the events in the fancy org-mode agenda along with holidays, I added
+the following to my configuration:
+
+#+begin_src emacs-lisp
+ (setq org-agenda-include-diary t)
+#+end_src
 
 [fn:beware]This program comes with absolutely no warranty.
