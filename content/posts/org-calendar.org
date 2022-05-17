@@ -1,0 +1,46 @@
+#+title: Viewing Important Dates in Emacs
+#+date: 2022-05-16
+#+draft: false
+#+tags[]: emacs
+
+For a while I tried to use ~org-mode~ to schedule appointments and keep track of
+my calendar. But eventually I gave up. I never found an effective way to
+coordinate with others. I still use Emacs to mark non-calendar-blocking events
+like market half days. My phone can easily keep track of regular events like
+birthdays. But recurrent events with more complicated rules are a pain. For
+example, crude oil futures expire the third business day before the 25th day of
+the month if the 25th is a business day, or the fourth prior day if the 25th is
+a holiday. Adding those dates to Outlook is a bit frustrating. So for those days
+I still use Emacs along with a small personal package with some additional [[https://github.com/foxfriday/date-functions][date
+functions]][fn:beware].
+
+The library provides just two public functions. The functions are just
+additional [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Sexp-Diary-Entries.html][sexp entries]] for the calendar. The first marks the start of my
+workweek. The second takes some rules and marks the dates that match the rules.
+For example, if I want to find the last work day of the month according to U.S.
+federal calendar, I can add this line to my diary:
+
+#+begin_src emacs-lisp
+ %%(diary-expirations 1 -1) Last work day of the month
+#+end_src
+
+Or I can mark the last work day before the 25th of every month according to
+a different calendar:
+
+#+begin_src emacs-lisp
+ %%(diary-expirations 25 -1 df-globex-holidays) First work day before the 25
+#+end_src
+
+Or something even more complicated, like finding the first work day on or before
+the 25th, and then mark the third work day before that day with a special color:
+
+#+begin_src emacs-lisp
+ %%(diary-expirations 25 -3 df-globex-holidays t personal-face) Hello
+#+end_src
+
+Now I can open the calendar with ~M-x calendar~, press ~m~ and the days that match
+the rule are colored with whatever color I choose. I can also press ~d~ and get
+some information on the date, in this case the string "Hello". And I can display
+the events in the fancy org-mode agenda along with holidays.
+
+[fn:beware]This program comes with absolutely no warranty.
