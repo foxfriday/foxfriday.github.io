@@ -18,8 +18,8 @@
 	{{- range .Data.Pages -}}
 	{{- if (in (.Site.Params.excludedTypes | default (slice "page")) .Type) -}}
 	{{- else -}}
-        {{ $date := .Date.Format "2006-02.01" }}
-        {{ $lastmod := .Lastmod.Format "2006-02.01" }}
+        {{ $date := .Date.Format "2006-01-02" }}
+        {{ $lastmod := .Lastmod.Format "2006-01-02" }}
 	<div class="post">
           <p>
           <div class="meta">

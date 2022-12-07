@@ -2,8 +2,8 @@
 <!-- SINGLE POST -->
 <html>
   {{ partial "header.html" . }}
-  {{ $date := .Date.Format "2006-02.01" }}
-  {{ $lastmod := .Lastmod.Format "2006-02.01" }}
+  {{ $date := .Date.Format "2006-01-02" }}
+  {{ $lastmod := .Lastmod.Format "2006-01-02" }}
   <body>
     <div class="container wrapper post">
       {{ partial "head.html" . }}

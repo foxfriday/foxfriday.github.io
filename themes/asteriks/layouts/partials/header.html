@@ -1,5 +1,6 @@
 <head>
   <meta charset="utf-8" />
+
   {{- $title := ( .Title ) -}}
   {{- $siteTitle := ( .Site.Title ) -}}
   {{- if .IsHome -}}
@@ -10,6 +11,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- FONT -->
+  <link rel="preload" href="{{ .Site.BaseURL }}fonts/Mona-Sans.woff2" as="font" type="font/woff2" crossorigin>
   <!-- RSS -->
   {{ with .OutputFormats.Get "rss" -}}
   {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
@@ -17,8 +20,7 @@
   <!-- STYLE SHEETS -->
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .Site.BaseURL }}css/light.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .Site.BaseURL }}css/syntax.css" />
-
-  <!-- Math Support -->
+  <!-- MATH SUPPORT -->
   {{ if .Params.mathjax }}
   {{ partial "mathjax_support.html" . }}
   {{ end }}

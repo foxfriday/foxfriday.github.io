@@ -7,15 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>M. Rincón</copyright>
-    <lastBuildDate>Tue, 10 May 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://foxfriday.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 06 Dec 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://foxfriday.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Hello</title>
-      <link>https://foxfriday.github.io/posts/hello/</link>
-      <pubDate>Tue, 10 May 2022 00:00:00 +0000</pubDate>
+      <title>Tracking Packages With Org-Mode</title>
+      <link>https://foxfriday.github.io/posts/org-tracking/</link>
+      <pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate>
       
-      <guid>https://foxfriday.github.io/posts/hello/</guid>
-      <description>Here&amp;#39;s some text. And more text. Something else is here.
-1 2  x = &amp;#34;hello cat&amp;#34; print(x)     Here is more text.</description>
+      <guid>https://foxfriday.github.io/posts/org-tracking/</guid>
+      <description>&lt;p&gt;
+December is the season to mail and receive packages. To keep track of them, I create a
+&lt;code&gt;TODO&lt;/code&gt; item for each package in an Emacs&amp;#39; org file. I make note of the mailing date, the
+content of the package, and the tracking number. The advantage of using Emacs is that a
+few line of code can make the tracking numbers clickable.&lt;/p&gt;</description>
     </item>
     
   </channel>

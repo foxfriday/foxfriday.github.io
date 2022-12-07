@@ -1,21 +1,19 @@
 @font-face {
-    font-family: raleway-reg;
-    src: url("../fonts/Raleway-VF.woff");
-}
-
-@font-face {
-    font-family: fanwood;
-    src: url("../fonts/fanwood-webfont.woff");
+  font-family: 'Mona Sans';
+  src: url('../fonts/Mona-Sans.woff2') format('woff2 supports variations'),
+       url('../fonts/Mona-Sans.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
 }
 
 body {
-    font-family: fanwood, sans-serif;
+    font-family: 'Mona Sans', sans-serif;
     color: black;
     line-height: 1.5rem;
     font-size: 1.2rem;
 }
 p {
-    font-family: fanwood, sans-serif;
+    font-family: 'Mona Sans', sans-serif;
     font-size: 1.2rem;
 }
  /* links */
@@ -43,10 +41,9 @@ img, figure {
 }
 /* headers */
 h1,h2,h3,h4,h5,h6 {
-    font-family: raleway-reg, fanwood, sans-serif;
     line-height: 1.2rem;
     color: black;
-    font-weight: normal;
+    font-weight: 550;
 }
 h1 { font-size: 1.4rem; }
 h2 { font-size: 1.3rem; }
@@ -98,7 +95,6 @@ ul.flat li {
 .header nav ul,
 .header nav li {
     margin: 0;
-    font-family: raleway-reg, fanwood, sans-serif;
 }
 
 .header nav ul.flat {
@@ -188,7 +184,6 @@ ul.flat li {
     color: Black;
     padding: 20px 0;
     margin-top: 40px;
-    font-family: raleway-reg, fanwood, sans-serif;
 }
 
 .page-title {

@@ -1,0 +1,48 @@
+#+title: Tracking Packages With Org-Mode
+#+date: 2022-12-06
+#+draft: false
+#+tags[]: emacs
+
+December is the season to mail and receive packages. To keep track of them, I create a
+~TODO~ item for each package in an Emacs' org file. I make note of the mailing date, the
+content of the package, and the tracking number. The advantage of using Emacs is that a
+few line of code can make the tracking numbers clickable.
+
+# more
+
+#+begin_src emacs-lisp :tangle yes
+(defun org-link-track-ups (path arg)
+  "Track a ups package where PATH is the tracking number."
+  (browse-url
+   (url-encode-url
+    (concat "https://www.ups.com/track?loc=en_US&tracknum=" path))
+   arg))
+
+(defun org-link-track-usps (path arg)
+  "Track a usps package where PATH is the tracking number."
+  (browse-url
+   (url-encode-url
+    (concat "https://tools.usps.com/go/TrackConfirmAction.action?tLabels="
+            path))
+   arg))
+
+(defun org-link-track-fedex (path arg)
+  "Track a fedex package where PATH is the tracking number."
+  (browse-url
+   (url-encode-url
+    (concat "https://www.fedex.com/fedextrack/?trknbr=" path))
+   arg))
+
+(org-link-set-parameters "ups"
+                         :follow 'org-link-track-ups
+                         :face '(:foreground "green" :underline t))
+(org-link-set-parameters "usps"
+                         :follow 'org-link-track-usps
+                         :face '(:foreground "green" :underline t))
+(org-link-set-parameters "fedex"
+                         :follow 'org-link-track-fedex
+                         :face '(:foreground "green" :underline t))
+#+end_src
+
+Then, I can just type ~[[ups:<tracking number]]~ in an org file and ~open-at-point~
+lets me know where is my package.
