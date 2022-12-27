@@ -1,0 +1,126 @@
+#+title: Making ProtonVPN Usable on Linux
+#+date: 2022-12-27
+#+draft: false
+#+tags[]: openvpn killswitch
+
+Proton provides a GUI and a console application for Linux, but on 2022, it is nearly
+unusable. It consumes up to 2 GB of memory idled, drops connections and fails to reconnect
+unless the kill switch is deleted using ~nmcli~. And the command line application has a
+[[https://github.com/ProtonVPN/linux-cli/issues/62][bizarre dependency]] on ~nm-applet~, which of course means it cannot be used on a headless
+machine. Brilliant. And it [[https://github.com/ProtonVPN/linux-app/issues/49][appears]] that ~ProtonVPN~ is not going to fix this. The solution
+is to use ~ProtonVPN~ with ~OpenVPN~ or ~Wireguard~ —or better yet, find a provider that cares
+about Linux. Fortunately, using ~OpenVPN~ is easy.
+
+# more
+
+First, I logged into ~ProtonVPN~, and in the download section, made some configuration
+files. They have ~ovpn~ files for ~OpenVPN~ and ~conf~ files for ~Wireguard~. Once downloaded, I
+added the connections using ~NetworkManager~. I also gave them a friendlier name, and added
+a username. The username and password are different from the username and password I use
+to sign in to my account —it can be found in the comment section of the ~ovpn~ file, along
+with some configuration options. The password is in the account section of the website.
+
+#+begin_src sh :session sh :async
+# Add the connection
+nmcli con import type openvpn file <filename.ovpn>
+# Rename the connection
+nmcli con modify <old name> connection.id <new name>
+# Add the user name
+nmcli con modify <new name> vpn.user-name <user name>
+#+end_src
+
+The next step is to disable ~IPv6~. Doing this with ~NetworkManager~ will also set the correct
+~sysctl~ values in the kernel.
+
+#+begin_src sh :session sh :async
+nmcli con modify <connection> ipv6.method "disabled"
+# restart connection
+nmcl con up <connetion>
+# show settings
+nmcli -f ipv6 connection show <connection>
+# Verify (1 means that IPv6 is disabled)
+# Find the device
+nmcli device
+cat /proc/sys/net/ipv6/conf/<device>/disable_ipv6
+#+end_src
+
+One disadvantage of this method is that it has to be done for every device. On a hardwired
+device, this method may be enough. On a laptop, which may switch from hardwired to ~WiFi~,
+adding the following lines to ~/etc/sysctl.conf~ and reloading the changes with ~sysctl -p~
+may be a better option.
+
+#+begin_src
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv6.conf.tun0.disable_ipv6 = 1
+#+end_src
+
+I also wanted a ~killswitch~, so I used ~ufw~ to configure one. First I found the scope of my
+~LAN~ —ignore the 127.0.0.1/8, that's the loop back.
+
+#+begin_src sh :session sh :async
+ip address | grep inet
+#+end_src
+
+Because I wanted to be able to reconnect without turning off the firewall, I wrote down
+the VPN protocol, IP, and port in the ~ovpn~ file and made exceptions for them. In the file,
+these have the format ~REMOTE <ip> <port>~.
+
+#+begin_src sh :session sh :async
+ufw disable
+ufw --force reset
+# whitelist the LAN
+ufw allow in to 192.168.1.0/24
+ufw allow out to 192.168.1.0/24
+# block all incoming and outgoing traffic by default
+ufw default deny outgoing
+ufw default deny incoming
+# allow exception to the vpn, assuming udp
+ufw allow out to <ip> port <port> proto udp
+# send everything through the tunner
+ufw allow in on tun0 from any to any
+ufw allow out on tun0 from any to any
+# enable
+ufw enable
+# check configuration
+uwf status
+# turn on restart
+systemctl enable ufw
+#+end_src
+
+At this point there should not be any connection outside the LAN and the VPN servers until
+the VPN is activated.
+
+#+begin_src sh :session sh :async
+# ping google should fail
+ping 8.8.8.8
+# but work after vpn is activate
+nmcli --ask con up <vpn name>
+ping google
+# we can also check for leaks
+curl https://ipleak.net/json/ | bat -l json
+# and in the DNS
+session=$(echo mrfox | sha1sum)
+for i in $(seq 5000 5003);
+do
+   curl "https://${session:0:40}-${i}.ipleak.net/dnsdetection/"
+   sleep 1
+done
+#+end_src
+
+If I need to, I can revert these changes in a few steps. First, allow ~ipv6~ again by
+removing the new lines in ~/etc/sysctl.conf~ and reloading the changes with ~sysctl -p~, or
+setting the ~ipv6.method~ of the device back to ~auto~. I can then disable the firewall,
+disconnect, and delete the connection. I can also remove any no longer needed certificates
+in ~~/.cert/nm-openvpn/~.
+
+#+begin_src sh :session sh :async
+nmcli con modify <connection> ipv6.method "auto"
+nmcli con down <connection>
+nmcli con delete <connection>
+ufw disable
+ufw reset
+# if needed
+systemctl disable ufw
+#+end_src

@@ -18,13 +18,13 @@ p {
 }
  /* links */
 a, a:hover {
-    color: DarkRed;
+    color: darkred;
     text-decoration: none;
     word-break: break-all;
 }
 /* mouse over link */
 a:hover {
-  color: DarkRed;
+  color: darkred;
   text-decoration: underline;
 }
 /* mouse selection */
@@ -140,7 +140,7 @@ ul.flat li {
 }
 
 .post .modified-label {
-    color: Black;
+    color: black;
     text-decoration: underline;
     padding: 2px 4px;
     border-radius: 4px;
@@ -149,12 +149,12 @@ ul.flat li {
 }
 
 .post .draft-label {
-    color: Green;
+    color: green;
     text-decoration: none;
     padding: 2px 4px;
     border-radius: 4px;
     margin-left: 6px;
-    background-color: GhostWhite;
+    background-color: ghostwhite;
 }
 
 .post-tags .tags li {
@@ -170,18 +170,18 @@ ul.flat li {
     border: 1px solid Red;
     border-radius: 10px;
     padding: 0px 6px;
-    color: DarkRed;
+    color: darkred;
     line-height: 20px;
     font-size: 1rem;
     text-decoration: none;
     margin: 0 1px;
-    background-color: GhostWhite;
+    background-color: ghostwhite;
 }
 
 .footer {
     text-align: right;
     font-size: 0.8rem;
-    color: Black;
+    color: black;
     padding: 20px 0;
     margin-top: 40px;
 }
