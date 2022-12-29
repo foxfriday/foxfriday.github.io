@@ -190,7 +190,9 @@ ul.flat li {
     margin-bottom: 0;
 }
 /* code blocks */
-code { font-size: 1rem; }
+code {
+    font-size: 1.1rem;
+}
 /* MathJax */
 code.has-jax {
     -webkit-font-smoothing: antialiased;
