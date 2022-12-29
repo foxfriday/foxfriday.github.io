@@ -8,6 +8,9 @@
       {{ partial "head.html" . }}
 
       <h1 class="page-title">{{ .Title }}</h1>
+      <p>
+        To create a feed for a single topic, click on the tag and append <code>index.xml</code> to the address.
+      </p>
       <ul>
         {{ range .Site.Taxonomies.tags }}
         <li><a href="{{ .Page.Permalink }}">{{ .Page.Title }}</a> {{ .Count }}</li>
