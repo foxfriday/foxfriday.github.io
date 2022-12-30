@@ -50,11 +50,43 @@ may be a better option.</p><div class="src src-text"><div class=highlight><div c
 </span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>net.ipv6.conf.all.disable_ipv6 = 1
 </span></span><span class=line><span class=cl>net.ipv6.conf.default.disable_ipv6 = 1
 </span></span><span class=line><span class=cl>net.ipv6.conf.lo.disable_ipv6 = 1
-</span></span><span class=line><span class=cl>net.ipv6.conf.tun0.disable_ipv6 = 1</span></span></code></pre></td></tr></table></div></div></div><p>I also wanted a <code>killswitch</code>, so I used <code>ufw</code> to configure one. First I found the scope of my
+</span></span><span class=line><span class=cl>net.ipv6.conf.tun0.disable_ipv6 = 1</span></span></code></pre></td></tr></table></div></div></div><p>An interesting option is to use the <code>NetworkManager Dispatcher</code> to disable <code>IpV6</code> only when I
+connect to the <code>VPN</code>. Whenever there's an event, the <code>NetworkManager</code>'s dispatcher runs the
+scripts placed in <code>/usr/NetworkManager/dispatcher.d</code> in alphabetical order, as long as the
+script is an executable owned by root, and the file is not writable by group or other (see
+<code>man NetworkManager-dispatcher</code>). The scripts get two arguments: the name of device and the
+event.</p><p>To make this work I first started the dispatcher.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>systemctl <span class=nb>enable</span> --now NetworkManager-dispatcher</span></span></code></pre></td></tr></table></div></div></div><p>Then, I made a small script inside <code>dispatcher.d/</code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=cp>#!/bin/sh
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=c1># ensure root ownership and make sure its an executable</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>case</span> <span class=s2>&#34;</span><span class=nv>$2</span><span class=s2>&#34;</span> in
+</span></span><span class=line><span class=cl>    vpn-up<span class=o>)</span>
+</span></span><span class=line><span class=cl>	<span class=nb>echo</span> <span class=m>1</span> &gt; /proc/sys/net/ipv6/conf/all/disable_ipv6
+</span></span><span class=line><span class=cl>	<span class=p>;;</span>
+</span></span><span class=line><span class=cl>    vpn-down<span class=o>)</span>
+</span></span><span class=line><span class=cl>	<span class=nb>echo</span> <span class=m>0</span> &gt; /proc/sys/net/ipv6/conf/all/disable_ipv6
+</span></span><span class=line><span class=cl>	<span class=p>;;</span>
+</span></span><span class=line><span class=cl><span class=k>esac</span></span></span></code></pre></td></tr></table></div></div></div><p>Now starting a connection disables <code>IpV6</code>. Unfortunately, <code>vpn-down</code> is not triggered when the
+<code>VPN</code> disconnects forcefully.</p><div id=outline-container-headline-1 class=outline-3><h3 id=headline-1>Adding a Killswitch</h3><div id=outline-text-headline-1 class=outline-text-3><p>I also wanted a <code>killswitch</code>, so I used <code>ufw</code> to configure one. First I found the scope of my
 <code>LAN</code> —ignore the 127.0.0.1/8, that's the loop back.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
 </span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>ip address <span class=p>|</span> grep inet</span></span></code></pre></td></tr></table></div></div></div><p>Because I wanted to be able to reconnect without turning off the firewall, I wrote down
 the VPN protocol, IP, and port in the <code>ovpn</code> file and made exceptions for them. In the file,
-these have the format <code>REMOTE &lt;ip> &lt;port></code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+these have the format <code>REMOTE &lt;ip> &lt;port></code>. Optionally, <code>systemd</code> can set the firewall using
+<code>ufw</code> to its last state after restart. So if the firewall was disabled, it will remain
+disabled after restart.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
 </span><span class=lnt> 2
 </span><span class=lnt> 3
 </span><span class=lnt> 4
@@ -83,13 +115,13 @@ these have the format <code>REMOTE &lt;ip> &lt;port></code>.</p><div class="src 
 </span></span><span class=line><span class=cl>ufw default deny incoming
 </span></span><span class=line><span class=cl><span class=c1># allow exception to the vpn, assuming udp</span>
 </span></span><span class=line><span class=cl>ufw allow out to &lt;ip&gt; port &lt;port&gt; proto udp
-</span></span><span class=line><span class=cl><span class=c1># send everything through the tunner</span>
+</span></span><span class=line><span class=cl><span class=c1># send everything through the tunnel</span>
 </span></span><span class=line><span class=cl>ufw allow in on tun0 from any to any
 </span></span><span class=line><span class=cl>ufw allow out on tun0 from any to any
 </span></span><span class=line><span class=cl><span class=c1># enable</span>
 </span></span><span class=line><span class=cl>ufw <span class=nb>enable</span>
 </span></span><span class=line><span class=cl><span class=c1># check configuration</span>
-</span></span><span class=line><span class=cl>uwf status
+</span></span><span class=line><span class=cl>uwf status verbose
 </span></span><span class=line><span class=cl><span class=c1># turn on restart</span>
 </span></span><span class=line><span class=cl>systemctl <span class=nb>enable</span> ufw</span></span></code></pre></td></tr></table></div></div></div><p>At this point there should not be any connection outside the LAN and the VPN servers until
 the VPN is activated.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
@@ -119,7 +151,24 @@ the VPN is activated.</p><div class="src src-sh"><div class=highlight><div class
 </span></span><span class=line><span class=cl><span class=k>do</span>
 </span></span><span class=line><span class=cl>   curl <span class=s2>&#34;https://</span><span class=si>${</span><span class=nv>session</span><span class=p>:</span><span class=nv>0</span><span class=p>:</span><span class=nv>40</span><span class=si>}</span><span class=s2>-</span><span class=si>${</span><span class=nv>i</span><span class=si>}</span><span class=s2>.ipleak.net/dnsdetection/&#34;</span>
 </span></span><span class=line><span class=cl>   sleep <span class=m>1</span>
-</span></span><span class=line><span class=cl><span class=k>done</span></span></span></code></pre></td></tr></table></div></div></div><p>If I need to, I can revert these changes in a few steps. First, allow <code>ipv6</code> again by
+</span></span><span class=line><span class=cl><span class=k>done</span></span></span></code></pre></td></tr></table></div></div></div><p>Additionally, I used the dispatcher to set and delete the firewall rules when the
+connection is up or down.</p></div></div><div id=outline-container-headline-2 class=outline-3><h3 id=headline-2>Saving Passwords</h3><div id=outline-text-headline-2 class=outline-text-3><p>With <code>nmcli</code>, the password can be entered manually using the <code>--ask</code> flag, or it can be stored
+in a file with the line <code>vpn.secrets.password:&lt;the password></code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>nmcli --ask con up &lt;connection&gt;
+</span></span><span class=line><span class=cl><span class=c1># with a file</span>
+</span></span><span class=line><span class=cl>chown root:root &lt;file&gt;
+</span></span><span class=line><span class=cl>chmod <span class=m>400</span> &lt;file&gt;
+</span></span><span class=line><span class=cl>nmcli con up id &lt;connection&gt; passwd-file &lt;file&gt;</span></span></code></pre></td></tr></table></div></div></div><p>Another alternative is to place the password in the configuration file stored in
+<code>/etc/NetworkManager/system-connections</code>. For a VPN connection, I had to change the password
+flag to zero, and add the password in the secrets section.</p><div class="src src-conf"><pre tabindex=0><code class=language-conf data-lang=conf>[vpn]
+password-flags=0
+
+[vpn-secrets]
+password=&lt;password&gt;</code></pre></div></div></div><div id=outline-container-headline-3 class=outline-3><h3 id=headline-3>Reverting changes</h3><div id=outline-text-headline-3 class=outline-text-3><p>If I need to, I can revert these changes in a few steps. First, allow <code>ipv6</code> again by
 removing the new lines in <code>/etc/sysctl.conf</code> and reloading the changes with <code>sysctl -p</code>, or
 setting the <code>ipv6.method</code> of the device back to <code>auto</code>. I can then disable the firewall,
 disconnect, and delete the connection. I can also remove any no longer needed certificates
@@ -136,6 +185,6 @@ in <code>~/.cert/nm-openvpn/</code>.</p><div class="src src-sh"><div class=highl
 </span></span><span class=line><span class=cl>ufw disable
 </span></span><span class=line><span class=cl>ufw reset
 </span></span><span class=line><span class=cl><span class=c1># if needed</span>
-</span></span><span class=line><span class=cl>systemctl disable ufw</span></span></code></pre></td></tr></table></div></div></div></div><div class=post-tags><nav class="nav tags"><ul class=flat><li><a href=/tags/openvpn>openvpn</a></li><li><a href=/tags/killswitch>killswitch</a></li></ul></nav></div></div><div class="footer wrapper"><nav class=nav><div>All content by M. Rincón
+</span></span><span class=line><span class=cl>systemctl disable ufw</span></span></code></pre></td></tr></table></div></div></div></div></div></div><div class=post-tags><nav class="nav tags"><ul class=flat><li><a href=/tags/linux>linux</a></li></ul></nav></div></div><div class="footer wrapper"><nav class=nav><div>All content by M. Rincón
 is licensed under
 <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target=_blank rel="license noopener noreferrer" style=display:inline-block>CC BY 4.0</a></div></nav></div></body></html>

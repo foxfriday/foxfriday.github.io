@@ -84,6 +84,67 @@ may be a better option.&lt;/p>
 &lt;/div>
 &lt;/div>
 &lt;p>
+An interesting option is to use the &lt;code>NetworkManager Dispatcher&lt;/code> to disable &lt;code>IpV6&lt;/code> only when I
+connect to the &lt;code>VPN&lt;/code>. Whenever there&amp;#39;s an event, the &lt;code>NetworkManager&lt;/code>&amp;#39;s dispatcher runs the
+scripts placed in &lt;code>/usr/NetworkManager/dispatcher.d&lt;/code> in alphabetical order, as long as the
+script is an executable owned by root, and the file is not writable by group or other (see
+&lt;code>man NetworkManager-dispatcher&lt;/code>). The scripts get two arguments: the name of device and the
+event.&lt;/p>
+&lt;p>
+To make this work I first started the dispatcher.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">systemctl &lt;span class="nb">enable&lt;/span> --now NetworkManager-dispatcher&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+Then, I made a small script inside &lt;code>dispatcher.d/&lt;/code>.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#!/bin/sh
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ensure root ownership and make sure its an executable&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">case&lt;/span> &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="nv">$2&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> in
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> vpn-up&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> &lt;span class="m">1&lt;/span> &amp;gt; /proc/sys/net/ipv6/conf/all/disable_ipv6
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">;;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> vpn-down&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> &lt;span class="m">0&lt;/span> &amp;gt; /proc/sys/net/ipv6/conf/all/disable_ipv6
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">;;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">esac&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+Now starting a connection disables &lt;code>IpV6&lt;/code>. Unfortunately, &lt;code>vpn-down&lt;/code> is not triggered when the
+&lt;code>VPN&lt;/code> disconnects forcefully.&lt;/p>
+&lt;div id="outline-container-headline-1" class="outline-3">
+&lt;h3 id="headline-1">
+Adding a Killswitch
+&lt;/h3>
+&lt;div id="outline-text-headline-1" class="outline-text-3">
+&lt;p>
 I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> to configure one. First I found the scope of my
 &lt;code>LAN&lt;/code> —ignore the 127.0.0.1/8, that&amp;#39;s the loop back.&lt;/p>
 &lt;div class="src src-sh">
@@ -99,7 +160,9 @@ I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> 
 &lt;p>
 Because I wanted to be able to reconnect without turning off the firewall, I wrote down
 the VPN protocol, IP, and port in the &lt;code>ovpn&lt;/code> file and made exceptions for them. In the file,
-these have the format &lt;code>REMOTE &amp;lt;ip&amp;gt; &amp;lt;port&amp;gt;&lt;/code>.&lt;/p>
+these have the format &lt;code>REMOTE &amp;lt;ip&amp;gt; &amp;lt;port&amp;gt;&lt;/code>. Optionally, &lt;code>systemd&lt;/code> can set the firewall using
+&lt;code>ufw&lt;/code> to its last state after restart. So if the firewall was disabled, it will remain
+disabled after restart.&lt;/p>
 &lt;div class="src src-sh">
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
@@ -134,13 +197,13 @@ these have the format &lt;code>REMOTE &amp;lt;ip&amp;gt; &amp;lt;port&amp;gt;&lt
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw default deny incoming
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># allow exception to the vpn, assuming udp&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to &amp;lt;ip&amp;gt; port &amp;lt;port&amp;gt; proto udp
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># send everything through the tunner&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># send everything through the tunnel&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow in on tun0 from any to any
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out on tun0 from any to any
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># enable&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw &lt;span class="nb">enable&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># check configuration&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">uwf status
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">uwf status verbose
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># turn on restart&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl &lt;span class="nb">enable&lt;/span> ufw&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
@@ -186,6 +249,54 @@ the VPN is activated.&lt;/p>
 &lt;/div>
 &lt;/div>
 &lt;p>
+Additionally, I used the dispatcher to set and delete the firewall rules when the
+connection is up or down.&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;div id="outline-container-headline-2" class="outline-3">
+&lt;h3 id="headline-2">
+Saving Passwords
+&lt;/h3>
+&lt;div id="outline-text-headline-2" class="outline-text-3">
+&lt;p>
+With &lt;code>nmcli&lt;/code>, the password can be entered manually using the &lt;code>--ask&lt;/code> flag, or it can be stored
+in a file with the line &lt;code>vpn.secrets.password:&amp;lt;the password&amp;gt;&lt;/code>.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli --ask con up &amp;lt;connection&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># with a file&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chown root:root &amp;lt;file&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chmod &lt;span class="m">400&lt;/span> &amp;lt;file&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli con up id &amp;lt;connection&amp;gt; passwd-file &amp;lt;file&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+Another alternative is to place the password in the configuration file stored in
+&lt;code>/etc/NetworkManager/system-connections&lt;/code>. For a VPN connection, I had to change the password
+flag to zero, and add the password in the secrets section.&lt;/p>
+&lt;div class="src src-conf">
+&lt;pre tabindex="0">&lt;code class="language-conf" data-lang="conf">[vpn]
+password-flags=0
+[vpn-secrets]
+password=&amp;lt;password&amp;gt;&lt;/code>&lt;/pre>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;div id="outline-container-headline-3" class="outline-3">
+&lt;h3 id="headline-3">
+Reverting changes
+&lt;/h3>
+&lt;div id="outline-text-headline-3" class="outline-text-3">
+&lt;p>
 If I need to, I can revert these changes in a few steps. First, allow &lt;code>ipv6&lt;/code> again by
 removing the new lines in &lt;code>/etc/sysctl.conf&lt;/code> and reloading the changes with &lt;code>sysctl -p&lt;/code>, or
 setting the &lt;code>ipv6.method&lt;/code> of the device back to &lt;code>auto&lt;/code>. I can then disable the firewall,
@@ -210,6 +321,8 @@ in &lt;code>~/.cert/nm-openvpn/&lt;/code>.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw reset
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># if needed&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl disable ufw&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
 &lt;/div>
 &lt;/div>
 &lt;/div></description></item><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-tracking/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-tracking/</guid><description>&lt;p>
