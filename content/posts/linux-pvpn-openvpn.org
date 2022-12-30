@@ -1,7 +1,7 @@
 #+title: Making ProtonVPN Usable on Linux
 #+date: 2022-12-27
 #+draft: false
-#+tags[]: openvpn killswitch
+#+tags[]: linux
 
 Proton provides a GUI and a console application for Linux, but on 2022, it is nearly
 unusable. It consumes up to 2 GB of memory idled, drops connections and fails to reconnect
@@ -56,6 +56,41 @@ net.ipv6.conf.lo.disable_ipv6 = 1
 net.ipv6.conf.tun0.disable_ipv6 = 1
 #+end_src
 
+An interesting option is to use the ~NetworkManager Dispatcher~ to disable ~IpV6~ only when I
+connect to the ~VPN~. Whenever there's an event, the ~NetworkManager~'s dispatcher runs the
+scripts placed in ~/usr/NetworkManager/dispatcher.d~ in alphabetical order, as long as the
+script is an executable owned by root, and the file is not writable by group or other (see
+~man NetworkManager-dispatcher~). The scripts get two arguments: the name of device and the
+event.
+
+To make this work I first started the dispatcher.
+
+#+begin_src sh :session sh :async
+systemctl enable --now NetworkManager-dispatcher
+#+end_src
+
+Then, I made a small script inside ~dispatcher.d/~.
+
+#+begin_src sh :session sh :async
+#!/bin/sh
+
+# ensure root ownership and make sure its an executable
+
+case "$2" in
+    vpn-up)
+	echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+	;;
+    vpn-down)
+	echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+	;;
+esac
+#+end_src
+
+Now starting a connection disables ~IpV6~. Unfortunately, ~vpn-down~ is not triggered when the
+~VPN~ disconnects forcefully.
+
+** Adding a Killswitch
+
 I also wanted a ~killswitch~, so I used ~ufw~ to configure one. First I found the scope of my
 ~LAN~ —ignore the 127.0.0.1/8, that's the loop back.
 
@@ -65,7 +100,9 @@ ip address | grep inet
 
 Because I wanted to be able to reconnect without turning off the firewall, I wrote down
 the VPN protocol, IP, and port in the ~ovpn~ file and made exceptions for them. In the file,
-these have the format ~REMOTE <ip> <port>~.
+these have the format ~REMOTE <ip> <port>~. Optionally, ~systemd~ can set the firewall using
+~ufw~ to its last state after restart. So if the firewall was disabled, it will remain
+disabled after restart.
 
 #+begin_src sh :session sh :async
 ufw disable
@@ -78,13 +115,13 @@ ufw default deny outgoing
 ufw default deny incoming
 # allow exception to the vpn, assuming udp
 ufw allow out to <ip> port <port> proto udp
-# send everything through the tunner
+# send everything through the tunnel
 ufw allow in on tun0 from any to any
 ufw allow out on tun0 from any to any
 # enable
 ufw enable
 # check configuration
-uwf status
+uwf status verbose
 # turn on restart
 systemctl enable ufw
 #+end_src
@@ -108,6 +145,36 @@ do
    sleep 1
 done
 #+end_src
+
+Additionally, I used the dispatcher to set and delete the firewall rules when the
+connection is up or down.
+
+** Saving Passwords
+
+With ~nmcli~, the password can be entered manually using the ~--ask~ flag, or it can be stored
+in a file with the line ~vpn.secrets.password:<the password>~.
+
+#+begin_src sh :session sh :async
+nmcli --ask con up <connection>
+# with a file
+chown root:root <file>
+chmod 400 <file>
+nmcli con up id <connection> passwd-file <file>
+#+end_src
+
+Another alternative is to place the password in the configuration file stored in
+~/etc/NetworkManager/system-connections~. For a VPN connection, I had to change the password
+flag to zero, and add the password in the secrets section.
+
+#+begin_src conf
+[vpn]
+password-flags=0
+
+[vpn-secrets]
+password=<password>
+#+end_src
+
+** Reverting changes
 
 If I need to, I can revert these changes in a few steps. First, allow ~ipv6~ again by
 removing the new lines in ~/etc/sysctl.conf~ and reloading the changes with ~sysctl -p~, or
