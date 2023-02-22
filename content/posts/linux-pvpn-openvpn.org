@@ -1,133 +1,91 @@
 #+title: Making ProtonVPN Usable on Linux
-#+date: 2022-12-27
+#+date: 2023-02-21
 #+draft: false
 #+tags[]: linux
 
-Proton provides a GUI and a console application for Linux, but on 2022, it is nearly
-unusable. It consumes up to 2 GB of memory idled, drops connections and fails to reconnect
+ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
+unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
 unless the kill switch is deleted using ~nmcli~. And the command line application has a
 [[https://github.com/ProtonVPN/linux-cli/issues/62][bizarre dependency]] on ~nm-applet~, which of course means it cannot be used on a headless
 machine. Brilliant. And it [[https://github.com/ProtonVPN/linux-app/issues/49][appears]] that ~ProtonVPN~ is not going to fix this. The solution
-is to use ~ProtonVPN~ with ~OpenVPN~ or ~Wireguard~ —or better yet, find a provider that cares
-about Linux. Fortunately, using ~OpenVPN~ is easy.
+is to use ~ProtonVPN~ with ~Wireguard~ —or better yet, find a provider that cares about Linux.
 
 # more
 
-First, I logged into ~ProtonVPN~, and in the download section, made some configuration
-files. They have ~ovpn~ files for ~OpenVPN~ and ~conf~ files for ~Wireguard~. Once downloaded, I
-added the connections using ~NetworkManager~. I also gave them a friendlier name, and added
-a username. The username and password are different from the username and password I use
-to sign in to my account —it can be found in the comment section of the ~ovpn~ file, along
-with some configuration options. The password is in the account section of the website.
+First, installed ~Wireguard~. Then, I logged into ~ProtonVPN~, and in the download section,
+made and downloaded a few ~Wireguard~ configuration files. Once downloaded, I added the
+connections using ~NetworkManager~.
 
 #+begin_src sh :session sh :async
-# Add the connection
-nmcli con import type openvpn file <filename.ovpn>
-# Rename the connection
-nmcli con modify <old name> connection.id <new name>
-# Add the user name
-nmcli con modify <new name> vpn.user-name <user name>
+nmcli con import type wireguard file <filename.ovpn>
 #+end_src
 
-The next step is to disable ~IPv6~. Doing this with ~NetworkManager~ will also set the correct
-~sysctl~ values in the kernel.
+By default, all ~wireguard~ connections will auto connect on start up. Since I only want one
+default connection, I changed that. In addition, I disabled ~IPv6~ on all the connection.
 
 #+begin_src sh :session sh :async
-nmcli con modify <connection> ipv6.method "disabled"
-# restart connection
-nmcl con up <connetion>
-# show settings
-nmcli -f ipv6 connection show <connection>
-# Verify (1 means that IPv6 is disabled)
-# Find the device
-nmcli device
-cat /proc/sys/net/ipv6/conf/<device>/disable_ipv6
+# The first value will be set as default + autoconnect
+mapfile -t WG < <(nmcli con show | grep wireguard | cut -d' ' -f1 | tr '\n' ' ' )
+
+# No ipv6, auto connect to first only
+AUTOCONNECT=yes
+for CONN in "${WG[@]}"; do
+    echo nmcli con modify "${CONN}" ipv6.method "disabled"
+    echo nmcli con mod "${CONN}" connection.autoconnect "${AUTOCONNECT}"
+    AUTOCONNECT=no
+done
+
+echo "Autoconnect Settings:"
+echo ""
+nmcli -f name,autoconnect connection
 #+end_src
 
-One disadvantage of this method is that it has to be done for every device. On a hardwired
-device, this method may be enough. On a laptop, which may switch from hardwired to ~WiFi~,
-adding the following lines to ~/etc/sysctl.conf~ and reloading the changes with ~sysctl -p~
-may be a better option.
-
-#+begin_src
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv6.conf.default.disable_ipv6 = 1
-net.ipv6.conf.lo.disable_ipv6 = 1
-net.ipv6.conf.tun0.disable_ipv6 = 1
-#+end_src
-
-An interesting option is to use the ~NetworkManager Dispatcher~ to disable ~IpV6~ only when I
-connect to the ~VPN~. Whenever there's an event, the ~NetworkManager~'s dispatcher runs the
-scripts placed in ~/usr/NetworkManager/dispatcher.d~ in alphabetical order, as long as the
-script is an executable owned by root, and the file is not writable by group or other (see
-~man NetworkManager-dispatcher~). The scripts get two arguments: the name of device and the
-event.
-
-To make this work I first started the dispatcher.
+I also wanted a ~killswitch~, so I used ~ufw~ to configure one. First I disabled connections outside my ~LAN~.
 
 #+begin_src sh :session sh :async
-systemctl enable --now NetworkManager-dispatcher
-#+end_src
-
-Then, I made a small script inside ~dispatcher.d/~.
-
-#+begin_src sh :session sh :async
-#!/bin/sh
-
-# ensure root ownership and make sure its an executable
-
-case "$2" in
-    vpn-up)
-	echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
-	;;
-    vpn-down)
-	echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6
-	;;
-esac
-#+end_src
-
-Now starting a connection disables ~IpV6~. Unfortunately, ~vpn-down~ is not triggered when the
-~VPN~ disconnects forcefully.
-
-** Adding a Killswitch
-
-I also wanted a ~killswitch~, so I used ~ufw~ to configure one. First I found the scope of my
-~LAN~ —ignore the 127.0.0.1/8, that's the loop back.
-
-#+begin_src sh :session sh :async
+# ignore the 127.0.0.1/8 range, that's the loop back
 ip address | grep inet
-#+end_src
 
-Because I wanted to be able to reconnect without turning off the firewall, I wrote down
-the VPN protocol, IP, and port in the ~ovpn~ file and made exceptions for them. In the file,
-these have the format ~REMOTE <ip> <port>~. Optionally, ~systemd~ can set the firewall using
-~ufw~ to its last state after restart. So if the firewall was disabled, it will remain
-disabled after restart.
-
-#+begin_src sh :session sh :async
-ufw disable
-ufw --force reset
-# whitelist the LAN
-ufw allow in to 192.168.1.0/24
-ufw allow out to 192.168.1.0/24
-# block all incoming and outgoing traffic by default
+ufw reset
 ufw default deny outgoing
 ufw default deny incoming
-# allow exception to the vpn, assuming udp
-ufw allow out to <ip> port <port> proto udp
-# send everything through the tunnel
-ufw allow in on tun0 from any to any
-ufw allow out on tun0 from any to any
-# enable
-ufw enable
-# check configuration
-uwf status verbose
-# turn on restart
-systemctl enable ufw
+# whitelist the range found with ip address
+ufw allow in to 192.168.1.0/24
+ufw allow out to 192.168.1.0/24
 #+end_src
 
-At this point there should not be any connection outside the LAN and the VPN servers until
-the VPN is activated.
+Because I wanted to be able to reconnect without turning off the firewall, I also made
+exceptions for the ~VPN~ connections.
+
+#+begin_src sh :session sh :async
+mapfile -t WG < <(nmcli con show | grep wireguard | cut -d' ' -f1 | tr '\n' ' ' )
+
+for CONN in "${WG[@]}"; do
+   mapfile -t EP < <(grep endpoint <
+         /etc/NetworkManager/system-connections/"${CONN}".nmconnection |
+         cut -d= -f2 |
+         tr : ' ')
+   if [[ -v EP[0] ]] && [[ -v EP[1] ]]; then
+       ufw allow out to "${EP[0]}" port "${EP[1]}" proto udp
+       # send everything on VPN tunnel (equivalent to tun0 for openVPN)
+       ufw allow out on "${CONN}" from any to any
+       # Enable for bit torrent
+       # ufw allow in on "${CONN}" from any to any
+   else
+       echo "Unable to determine endpoint for ${CONN}" >&2
+       echo "Skipped" >&2
+       contninue
+   fi
+done
+
+# Enable ufw if needed
+{ ufw status | grep inactive; } && ufw enable
+echo "Rules:"
+ufw status verbose
+#+end_src
+
+At this point there shouldn't be any connection outside the ~LAN~ unless I have a ~VPN~
+connections.
 
 #+begin_src sh :session sh :async
 # ping google should fail
@@ -146,48 +104,5 @@ do
 done
 #+end_src
 
-Additionally, I used the dispatcher to set and delete the firewall rules when the
-connection is up or down.
-
-** Saving Passwords
-
-With ~nmcli~, the password can be entered manually using the ~--ask~ flag, or it can be stored
-in a file with the line ~vpn.secrets.password:<the password>~.
-
-#+begin_src sh :session sh :async
-nmcli --ask con up <connection>
-# with a file
-chown root:root <file>
-chmod 400 <file>
-nmcli con up id <connection> passwd-file <file>
-#+end_src
-
-Another alternative is to place the password in the configuration file stored in
-~/etc/NetworkManager/system-connections~. For a VPN connection, I had to change the password
-flag to zero, and add the password in the secrets section.
-
-#+begin_src conf
-[vpn]
-password-flags=0
-
-[vpn-secrets]
-password=<password>
-#+end_src
-
-** Reverting changes
-
-If I need to, I can revert these changes in a few steps. First, allow ~ipv6~ again by
-removing the new lines in ~/etc/sysctl.conf~ and reloading the changes with ~sysctl -p~, or
-setting the ~ipv6.method~ of the device back to ~auto~. I can then disable the firewall,
-disconnect, and delete the connection. I can also remove any no longer needed certificates
-in ~~/.cert/nm-openvpn/~.
-
-#+begin_src sh :session sh :async
-nmcli con modify <connection> ipv6.method "auto"
-nmcli con down <connection>
-nmcli con delete <connection>
-ufw disable
-ufw reset
-# if needed
-systemctl disable ufw
-#+end_src
+And that's that. If I need to disable the ~VPN~ I can easily do that, and things should work
+as long as I also disable the firewall.
