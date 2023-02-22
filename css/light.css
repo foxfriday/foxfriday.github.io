@@ -8,7 +8,7 @@
 
 body {
     font-family: 'Mona Sans', sans-serif;
-    color: black;
+    color: #000;
     line-height: 1.5rem;
     font-size: 1.2rem;
 }
@@ -18,18 +18,18 @@ p {
 }
  /* links */
 a, a:hover {
-    color: darkred;
+    color: #8b0000;
     text-decoration: none;
     word-break: break-all;
 }
 /* mouse over link */
 a:hover {
-  color: darkred;
+  color: #8b0000;
   text-decoration: underline;
 }
 /* mouse selection */
 ::selection {
-    background: Gainsboro;
+    background: #dcdcdc;
     text-shadow: none;
 }
 
@@ -42,7 +42,7 @@ img, figure {
 /* headers */
 h1,h2,h3,h4,h5,h6 {
     line-height: 1.2rem;
-    color: black;
+    color: #000;
     font-weight: 550;
 }
 h1 { font-size: 1.4rem; }
@@ -64,7 +64,7 @@ ul.flat li {
 .page-title { margin: 0; }
 
 .site-title a {
-    color: black;
+    color: #000;
     text-decoration: none !important;
 }
 
@@ -89,7 +89,7 @@ ul.flat li {
 
 .header nav {
     margin-top: 20px;
-    border-top: 1px solid Black;
+    border-top: 1px solid #000;
 }
 
 .header nav ul,
@@ -140,7 +140,7 @@ ul.flat li {
 }
 
 .post .modified-label {
-    color: black;
+    color: #000;
     text-decoration: underline;
     padding: 2px 4px;
     border-radius: 4px;
@@ -149,12 +149,12 @@ ul.flat li {
 }
 
 .post .draft-label {
-    color: green;
+    color: #008000;
     text-decoration: none;
     padding: 2px 4px;
     border-radius: 4px;
     margin-left: 6px;
-    background-color: ghostwhite;
+    background-color: #f8f8ff;
 }
 
 .post-tags .tags li {
@@ -170,18 +170,18 @@ ul.flat li {
     border: 1px solid Red;
     border-radius: 10px;
     padding: 0px 6px;
-    color: darkred;
+    color: #8b0000;
     line-height: 20px;
     font-size: 1rem;
     text-decoration: none;
     margin: 0 1px;
-    background-color: ghostwhite;
+    background-color: #f8f8ff;
 }
 
 .footer {
     text-align: right;
     font-size: 0.8rem;
-    color: black;
+    color: #000;
     padding: 20px 0;
     margin-top: 40px;
 }

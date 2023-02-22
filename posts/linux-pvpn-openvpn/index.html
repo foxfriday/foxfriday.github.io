@@ -1,62 +1,15 @@
 <!doctype html><html><head><meta charset=utf-8><title>Making ProtonVPN Usable on Linux - M. Rincón</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=preload href=https://mrincon.net/fonts/Mona-Sans.woff2 as=font type=font/woff2 crossorigin><link rel=stylesheet type=text/css media=screen href=https://mrincon.net/css/light.css><link rel=stylesheet type=text/css media=screen href=https://mrincon.net/css/syntax.css></head><body><div class="container wrapper post"><div class=header><base href=https://mrincon.net/><div class=site-description><h1 class=site-title><a href=https://mrincon.net/>M. Rincón
 </a>&mdash;
-<small>Guided by the asterik</small></h1></div><nav class=nav><ul class=flat><li><a href=/>Home</a></li><li><a href=posts/>Posts</a></li><li><a href=/tags>Tags</a></li><li><a href=/index.xml>Rss</a></li><li><a href=https://github.com/foxfriday>GitHub</a></li></ul></nav></div><div class=post-header><h1 class=title>Making ProtonVPN Usable on Linux</h1><div class=meta>2022-12-27</div></div><div class=markdown><p>Proton provides a GUI and a console application for Linux, but on 2022, it is nearly
-unusable. It consumes up to 2 GB of memory idled, drops connections and fails to reconnect
+<small>Guided by the asterik</small></h1></div><nav class=nav><ul class=flat><li><a href=/>Home</a></li><li><a href=posts/>Posts</a></li><li><a href=/tags>Tags</a></li><li><a href=/index.xml>Rss</a></li><li><a href=https://github.com/foxfriday>GitHub</a></li></ul></nav></div><div class=post-header><h1 class=title>Making ProtonVPN Usable on Linux</h1><div class=meta>2023-02-21</div></div><div class=markdown><p>ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
+unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
 unless the kill switch is deleted using <code>nmcli</code>. And the command line application has a
 <a href=https://github.com/ProtonVPN/linux-cli/issues/62>bizarre dependency</a> on <code>nm-applet</code>, which of course means it cannot be used on a headless
 machine. Brilliant. And it <a href=https://github.com/ProtonVPN/linux-app/issues/49>appears</a> that <code>ProtonVPN</code> is not going to fix this. The solution
-is to use <code>ProtonVPN</code> with <code>OpenVPN</code> or <code>Wireguard</code> —or better yet, find a provider that cares
-about Linux. Fortunately, using <code>OpenVPN</code> is easy.</p><p>First, I logged into <code>ProtonVPN</code>, and in the download section, made some configuration
-files. They have <code>ovpn</code> files for <code>OpenVPN</code> and <code>conf</code> files for <code>Wireguard</code>. Once downloaded, I
-added the connections using <code>NetworkManager</code>. I also gave them a friendlier name, and added
-a username. The username and password are different from the username and password I use
-to sign in to my account —it can be found in the comment section of the <code>ovpn</code> file, along
-with some configuration options. The password is in the account section of the website.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span><span class=lnt>2
-</span><span class=lnt>3
-</span><span class=lnt>4
-</span><span class=lnt>5
-</span><span class=lnt>6
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=c1># Add the connection</span>
-</span></span><span class=line><span class=cl>nmcli con import <span class=nb>type</span> openvpn file &lt;filename.ovpn&gt;
-</span></span><span class=line><span class=cl><span class=c1># Rename the connection</span>
-</span></span><span class=line><span class=cl>nmcli con modify &lt;old name&gt; connection.id &lt;new name&gt;
-</span></span><span class=line><span class=cl><span class=c1># Add the user name</span>
-</span></span><span class=line><span class=cl>nmcli con modify &lt;new name&gt; vpn.user-name &lt;user name&gt;</span></span></code></pre></td></tr></table></div></div></div><p>The next step is to disable <code>IPv6</code>. Doing this with <code>NetworkManager</code> will also set the correct
-<code>sysctl</code> values in the kernel.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span><span class=lnt>2
-</span><span class=lnt>3
-</span><span class=lnt>4
-</span><span class=lnt>5
-</span><span class=lnt>6
-</span><span class=lnt>7
-</span><span class=lnt>8
-</span><span class=lnt>9
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>nmcli con modify &lt;connection&gt; ipv6.method <span class=s2>&#34;disabled&#34;</span>
-</span></span><span class=line><span class=cl><span class=c1># restart connection</span>
-</span></span><span class=line><span class=cl>nmcl con up &lt;connetion&gt;
-</span></span><span class=line><span class=cl><span class=c1># show settings</span>
-</span></span><span class=line><span class=cl>nmcli -f ipv6 connection show &lt;connection&gt;
-</span></span><span class=line><span class=cl><span class=c1># Verify (1 means that IPv6 is disabled)</span>
-</span></span><span class=line><span class=cl><span class=c1># Find the device</span>
-</span></span><span class=line><span class=cl>nmcli device
-</span></span><span class=line><span class=cl>cat /proc/sys/net/ipv6/conf/&lt;device&gt;/disable_ipv6</span></span></code></pre></td></tr></table></div></div></div><p>One disadvantage of this method is that it has to be done for every device. On a hardwired
-device, this method may be enough. On a laptop, which may switch from hardwired to <code>WiFi</code>,
-adding the following lines to <code>/etc/sysctl.conf</code> and reloading the changes with <code>sysctl -p</code>
-may be a better option.</p><div class="src src-text"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span><span class=lnt>2
-</span><span class=lnt>3
-</span><span class=lnt>4
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>net.ipv6.conf.all.disable_ipv6 = 1
-</span></span><span class=line><span class=cl>net.ipv6.conf.default.disable_ipv6 = 1
-</span></span><span class=line><span class=cl>net.ipv6.conf.lo.disable_ipv6 = 1
-</span></span><span class=line><span class=cl>net.ipv6.conf.tun0.disable_ipv6 = 1</span></span></code></pre></td></tr></table></div></div></div><p>An interesting option is to use the <code>NetworkManager Dispatcher</code> to disable <code>IpV6</code> only when I
-connect to the <code>VPN</code>. Whenever there's an event, the <code>NetworkManager</code>'s dispatcher runs the
-scripts placed in <code>/usr/NetworkManager/dispatcher.d</code> in alphabetical order, as long as the
-script is an executable owned by root, and the file is not writable by group or other (see
-<code>man NetworkManager-dispatcher</code>). The scripts get two arguments: the name of device and the
-event.</p><p>To make this work I first started the dispatcher.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>systemctl <span class=nb>enable</span> --now NetworkManager-dispatcher</span></span></code></pre></td></tr></table></div></div></div><p>Then, I made a small script inside <code>dispatcher.d/</code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+is to use <code>ProtonVPN</code> with <code>Wireguard</code> —or better yet, find a provider that cares about Linux.</p><p>First, installed <code>Wireguard</code>. Then, I logged into <code>ProtonVPN</code>, and in the download section,
+made and downloaded a few <code>Wireguard</code> configuration files. Once downloaded, I added the
+connections using <code>NetworkManager</code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>nmcli con import <span class=nb>type</span> wireguard file &lt;filename.ovpn&gt;</span></span></code></pre></td></tr></table></div></div></div><p>By default, all <code>wireguard</code> connections will auto connect on start up. Since I only want one
+default connection, I changed that. In addition, I disabled <code>IPv6</code> on all the connection.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
 </span><span class=lnt> 2
 </span><span class=lnt> 3
 </span><span class=lnt> 4
@@ -68,25 +21,40 @@ event.</p><p>To make this work I first started the dispatcher.</p><div class="sr
 </span><span class=lnt>10
 </span><span class=lnt>11
 </span><span class=lnt>12
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=cp>#!/bin/sh
-</span></span></span><span class=line><span class=cl><span class=cp></span>
-</span></span><span class=line><span class=cl><span class=c1># ensure root ownership and make sure its an executable</span>
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=c1># The first value will be set as default + autoconnect</span>
+</span></span><span class=line><span class=cl>mapfile -t WG &lt; &lt;<span class=o>(</span>nmcli con show <span class=p>|</span> grep wireguard <span class=p>|</span> cut -d<span class=s1>&#39; &#39;</span> -f1 <span class=p>|</span> tr <span class=s1>&#39;\n&#39;</span> <span class=s1>&#39; &#39;</span> <span class=o>)</span>
 </span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=k>case</span> <span class=s2>&#34;</span><span class=nv>$2</span><span class=s2>&#34;</span> in
-</span></span><span class=line><span class=cl>    vpn-up<span class=o>)</span>
-</span></span><span class=line><span class=cl>	<span class=nb>echo</span> <span class=m>1</span> &gt; /proc/sys/net/ipv6/conf/all/disable_ipv6
-</span></span><span class=line><span class=cl>	<span class=p>;;</span>
-</span></span><span class=line><span class=cl>    vpn-down<span class=o>)</span>
-</span></span><span class=line><span class=cl>	<span class=nb>echo</span> <span class=m>0</span> &gt; /proc/sys/net/ipv6/conf/all/disable_ipv6
-</span></span><span class=line><span class=cl>	<span class=p>;;</span>
-</span></span><span class=line><span class=cl><span class=k>esac</span></span></span></code></pre></td></tr></table></div></div></div><p>Now starting a connection disables <code>IpV6</code>. Unfortunately, <code>vpn-down</code> is not triggered when the
-<code>VPN</code> disconnects forcefully.</p><div id=outline-container-headline-1 class=outline-3><h3 id=headline-1>Adding a Killswitch</h3><div id=outline-text-headline-1 class=outline-text-3><p>I also wanted a <code>killswitch</code>, so I used <code>ufw</code> to configure one. First I found the scope of my
-<code>LAN</code> —ignore the 127.0.0.1/8, that's the loop back.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>ip address <span class=p>|</span> grep inet</span></span></code></pre></td></tr></table></div></div></div><p>Because I wanted to be able to reconnect without turning off the firewall, I wrote down
-the VPN protocol, IP, and port in the <code>ovpn</code> file and made exceptions for them. In the file,
-these have the format <code>REMOTE &lt;ip> &lt;port></code>. Optionally, <code>systemd</code> can set the firewall using
-<code>ufw</code> to its last state after restart. So if the firewall was disabled, it will remain
-disabled after restart.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span></span><span class=line><span class=cl><span class=c1># No ipv6, auto connect to first only</span>
+</span></span><span class=line><span class=cl><span class=nv>AUTOCONNECT</span><span class=o>=</span>yes
+</span></span><span class=line><span class=cl><span class=k>for</span> CONN in <span class=s2>&#34;</span><span class=si>${</span><span class=nv>WG</span><span class=p>[@]</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>;</span> <span class=k>do</span>
+</span></span><span class=line><span class=cl>    <span class=nb>echo</span> nmcli con modify <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> ipv6.method <span class=s2>&#34;disabled&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=nb>echo</span> nmcli con mod <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> connection.autoconnect <span class=s2>&#34;</span><span class=si>${</span><span class=nv>AUTOCONNECT</span><span class=si>}</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=nv>AUTOCONNECT</span><span class=o>=</span>no
+</span></span><span class=line><span class=cl><span class=k>done</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>echo</span> <span class=s2>&#34;Autoconnect Settings:&#34;</span>
+</span></span><span class=line><span class=cl><span class=nb>echo</span> <span class=s2>&#34;&#34;</span>
+</span></span><span class=line><span class=cl>nmcli -f name,autoconnect connection</span></span></code></pre></td></tr></table></div></div></div><p>I also wanted a <code>killswitch</code>, so I used <code>ufw</code> to configure one. First I disabled connections outside my <code>LAN</code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl><span class=c1># ignore the 127.0.0.1/8 range, that&#39;s the loop back</span>
+</span></span><span class=line><span class=cl>ip address <span class=p>|</span> grep inet
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>ufw reset
+</span></span><span class=line><span class=cl>ufw default deny outgoing
+</span></span><span class=line><span class=cl>ufw default deny incoming
+</span></span><span class=line><span class=cl><span class=c1># whitelist the range found with ip address</span>
+</span></span><span class=line><span class=cl>ufw allow in to 192.168.1.0/24
+</span></span><span class=line><span class=cl>ufw allow out to 192.168.1.0/24</span></span></code></pre></td></tr></table></div></div></div><p>Because I wanted to be able to reconnect without turning off the firewall, I also made
+exceptions for the <code>VPN</code> connections.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
 </span><span class=lnt> 2
 </span><span class=lnt> 3
 </span><span class=lnt> 4
@@ -105,26 +73,36 @@ disabled after restart.</p><div class="src src-sh"><div class=highlight><div cla
 </span><span class=lnt>17
 </span><span class=lnt>18
 </span><span class=lnt>19
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>ufw disable
-</span></span><span class=line><span class=cl>ufw --force reset
-</span></span><span class=line><span class=cl><span class=c1># whitelist the LAN</span>
-</span></span><span class=line><span class=cl>ufw allow in to 192.168.1.0/24
-</span></span><span class=line><span class=cl>ufw allow out to 192.168.1.0/24
-</span></span><span class=line><span class=cl><span class=c1># block all incoming and outgoing traffic by default</span>
-</span></span><span class=line><span class=cl>ufw default deny outgoing
-</span></span><span class=line><span class=cl>ufw default deny incoming
-</span></span><span class=line><span class=cl><span class=c1># allow exception to the vpn, assuming udp</span>
-</span></span><span class=line><span class=cl>ufw allow out to &lt;ip&gt; port &lt;port&gt; proto udp
-</span></span><span class=line><span class=cl><span class=c1># send everything through the tunnel</span>
-</span></span><span class=line><span class=cl>ufw allow in on tun0 from any to any
-</span></span><span class=line><span class=cl>ufw allow out on tun0 from any to any
-</span></span><span class=line><span class=cl><span class=c1># enable</span>
-</span></span><span class=line><span class=cl>ufw <span class=nb>enable</span>
-</span></span><span class=line><span class=cl><span class=c1># check configuration</span>
-</span></span><span class=line><span class=cl>uwf status verbose
-</span></span><span class=line><span class=cl><span class=c1># turn on restart</span>
-</span></span><span class=line><span class=cl>systemctl <span class=nb>enable</span> ufw</span></span></code></pre></td></tr></table></div></div></div><p>At this point there should not be any connection outside the LAN and the VPN servers until
-the VPN is activated.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>mapfile -t WG &lt; &lt;<span class=o>(</span>nmcli con show <span class=p>|</span> grep wireguard <span class=p>|</span> cut -d<span class=s1>&#39; &#39;</span> -f1 <span class=p>|</span> tr <span class=s1>&#39;\n&#39;</span> <span class=s1>&#39; &#39;</span> <span class=o>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>for</span> CONN in <span class=s2>&#34;</span><span class=si>${</span><span class=nv>WG</span><span class=p>[@]</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>;</span> <span class=k>do</span>
+</span></span><span class=line><span class=cl>   mapfile -t EP &lt; &lt;<span class=o>(</span>grep endpoint &lt;
+</span></span><span class=line><span class=cl>         /etc/NetworkManager/system-connections/<span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span>.nmconnection <span class=p>|</span>
+</span></span><span class=line><span class=cl>         cut -d<span class=o>=</span> -f2 <span class=p>|</span>
+</span></span><span class=line><span class=cl>         tr : <span class=s1>&#39; &#39;</span><span class=o>)</span>
+</span></span><span class=line><span class=cl>   <span class=k>if</span> <span class=o>[[</span> -v EP<span class=o>[</span>0<span class=o>]</span> <span class=o>]]</span> <span class=o>&amp;&amp;</span> <span class=o>[[</span> -v EP<span class=o>[</span>1<span class=o>]</span> <span class=o>]]</span><span class=p>;</span> <span class=k>then</span>
+</span></span><span class=line><span class=cl>       ufw allow out to <span class=s2>&#34;</span><span class=si>${</span><span class=nv>EP</span><span class=p>[0]</span><span class=si>}</span><span class=s2>&#34;</span> port <span class=s2>&#34;</span><span class=si>${</span><span class=nv>EP</span><span class=p>[1]</span><span class=si>}</span><span class=s2>&#34;</span> proto udp
+</span></span><span class=line><span class=cl>       <span class=c1># send everything on VPN tunnel (equivalent to tun0 for openVPN)</span>
+</span></span><span class=line><span class=cl>       ufw allow out on <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> from any to any
+</span></span><span class=line><span class=cl>       <span class=c1># Enable for bit torrent</span>
+</span></span><span class=line><span class=cl>       <span class=c1># ufw allow in on &#34;${CONN}&#34; from any to any</span>
+</span></span><span class=line><span class=cl>   <span class=k>else</span>
+</span></span><span class=line><span class=cl>       <span class=nb>echo</span> <span class=s2>&#34;Unable to determine endpoint for </span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> &gt;<span class=p>&amp;</span><span class=m>2</span>
+</span></span><span class=line><span class=cl>       <span class=nb>echo</span> <span class=s2>&#34;Skipped&#34;</span> &gt;<span class=p>&amp;</span><span class=m>2</span>
+</span></span><span class=line><span class=cl>       contninue
+</span></span><span class=line><span class=cl>   <span class=k>fi</span>
+</span></span><span class=line><span class=cl><span class=k>done</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Enable ufw if needed</span>
+</span></span><span class=line><span class=cl><span class=o>{</span> ufw status <span class=p>|</span> grep inactive<span class=p>;</span> <span class=o>}</span> <span class=o>&amp;&amp;</span> ufw <span class=nb>enable</span>
+</span></span><span class=line><span class=cl><span class=nb>echo</span> <span class=s2>&#34;Rules:&#34;</span>
+</span></span><span class=line><span class=cl>ufw status verbose</span></span></code></pre></td></tr></table></div></div></div><p>At this point there shouldn't be any connection outside the <code>LAN</code> unless I have a <code>VPN</code>
+connections.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
 </span><span class=lnt> 2
 </span><span class=lnt> 3
 </span><span class=lnt> 4
@@ -151,40 +129,7 @@ the VPN is activated.</p><div class="src src-sh"><div class=highlight><div class
 </span></span><span class=line><span class=cl><span class=k>do</span>
 </span></span><span class=line><span class=cl>   curl <span class=s2>&#34;https://</span><span class=si>${</span><span class=nv>session</span><span class=p>:</span><span class=nv>0</span><span class=p>:</span><span class=nv>40</span><span class=si>}</span><span class=s2>-</span><span class=si>${</span><span class=nv>i</span><span class=si>}</span><span class=s2>.ipleak.net/dnsdetection/&#34;</span>
 </span></span><span class=line><span class=cl>   sleep <span class=m>1</span>
-</span></span><span class=line><span class=cl><span class=k>done</span></span></span></code></pre></td></tr></table></div></div></div><p>Additionally, I used the dispatcher to set and delete the firewall rules when the
-connection is up or down.</p></div></div><div id=outline-container-headline-2 class=outline-3><h3 id=headline-2>Saving Passwords</h3><div id=outline-text-headline-2 class=outline-text-3><p>With <code>nmcli</code>, the password can be entered manually using the <code>--ask</code> flag, or it can be stored
-in a file with the line <code>vpn.secrets.password:&lt;the password></code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span><span class=lnt>2
-</span><span class=lnt>3
-</span><span class=lnt>4
-</span><span class=lnt>5
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>nmcli --ask con up &lt;connection&gt;
-</span></span><span class=line><span class=cl><span class=c1># with a file</span>
-</span></span><span class=line><span class=cl>chown root:root &lt;file&gt;
-</span></span><span class=line><span class=cl>chmod <span class=m>400</span> &lt;file&gt;
-</span></span><span class=line><span class=cl>nmcli con up id &lt;connection&gt; passwd-file &lt;file&gt;</span></span></code></pre></td></tr></table></div></div></div><p>Another alternative is to place the password in the configuration file stored in
-<code>/etc/NetworkManager/system-connections</code>. For a VPN connection, I had to change the password
-flag to zero, and add the password in the secrets section.</p><div class="src src-conf"><pre tabindex=0><code class=language-conf data-lang=conf>[vpn]
-password-flags=0
-
-[vpn-secrets]
-password=&lt;password&gt;</code></pre></div></div></div><div id=outline-container-headline-3 class=outline-3><h3 id=headline-3>Reverting changes</h3><div id=outline-text-headline-3 class=outline-text-3><p>If I need to, I can revert these changes in a few steps. First, allow <code>ipv6</code> again by
-removing the new lines in <code>/etc/sysctl.conf</code> and reloading the changes with <code>sysctl -p</code>, or
-setting the <code>ipv6.method</code> of the device back to <code>auto</code>. I can then disable the firewall,
-disconnect, and delete the connection. I can also remove any no longer needed certificates
-in <code>~/.cert/nm-openvpn/</code>.</p><div class="src src-sh"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
-</span><span class=lnt>2
-</span><span class=lnt>3
-</span><span class=lnt>4
-</span><span class=lnt>5
-</span><span class=lnt>6
-</span><span class=lnt>7
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh><span class=line><span class=cl>nmcli con modify &lt;connection&gt; ipv6.method <span class=s2>&#34;auto&#34;</span>
-</span></span><span class=line><span class=cl>nmcli con down &lt;connection&gt;
-</span></span><span class=line><span class=cl>nmcli con delete &lt;connection&gt;
-</span></span><span class=line><span class=cl>ufw disable
-</span></span><span class=line><span class=cl>ufw reset
-</span></span><span class=line><span class=cl><span class=c1># if needed</span>
-</span></span><span class=line><span class=cl>systemctl disable ufw</span></span></code></pre></td></tr></table></div></div></div></div></div></div><div class=post-tags><nav class="nav tags"><ul class=flat><li><a href=/tags/linux>linux</a></li></ul></nav></div></div><div class="footer wrapper"><nav class=nav><div>All content by M. Rincón
+</span></span><span class=line><span class=cl><span class=k>done</span></span></span></code></pre></td></tr></table></div></div></div><p>And that's that. If I need to disable the <code>VPN</code> I can easily do that, and things should work
+as long as I also disable the firewall.</p></div><div class=post-tags><nav class="nav tags"><ul class=flat><li><a href=/tags/linux>linux</a></li></ul></nav></div></div><div class="footer wrapper"><nav class=nav><div>All content by M. Rincón
 is licensed under
 <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target=_blank rel="license noopener noreferrer" style=display:inline-block>CC BY 4.0</a></div></nav></div></body></html>
