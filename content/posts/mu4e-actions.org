@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #+title: Adding mu4e Actions
 #+date: 2023-02-22
 #+draft: false
@@ -222,16 +221,17 @@ And another function to clean the temporary files.
 #+begin_src emacs-lisp :tangle yes
 (defun extra-clean-temp-email-directory ()
   "Remove all files from DIR if possible."
-  (let* ((files (directory-files extra-temp-email-dir
-                                 t
-                                 directory-files-no-dot-files-regexp)))
-    (dolist (file files)
+  (when (file-directory-p extra-temp-email-dir)
+    (let ((files (directory-files extra-temp-email-dir
+                                  t
+                                  directory-files-no-dot-files-regexp)))
+      (dolist (file files)
+        (condition-case nil
+            (delete-file file)
+          (error nil)))
       (condition-case nil
-          (delete-file file)
-        (error nil)))
-    (condition-case nil
-        (delete-directory extra-temp-email-dir)
-      (error nil))))
+          (delete-directory extra-temp-email-dir)
+        (error nil)))))
 
 (add-hook 'kill-emacs-hook 'extra-clean-temp-email-directory)
 #+end_src
@@ -252,4 +252,3 @@ configuration.
 and other myriad of tiny annoyances —in addition to the fact that ~apt install~ sneakily
 contacts the snap store but makes you use ~snap refresh~, because you know, ~apt~, ~apt-get~,
 ~cargo~, and ~pip~ are just not enough.
->>>>>>> 7e71da7aef7b9443a0983364448d0e6d59e6b091
