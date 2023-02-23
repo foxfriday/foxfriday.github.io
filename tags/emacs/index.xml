@@ -1,4 +1,227 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>emacs on M. Rincón</title><link>https://mrincon.net/tags/emacs/</link><description>Recent content in emacs on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Tue, 06 Dec 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/emacs/index.xml" rel="self" type="application/rss+xml"/><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-tracking/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-tracking/</guid><description>&lt;p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>emacs on M. Rincón</title><link>https://mrincon.net/tags/emacs/</link><description>Recent content in emacs on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Wed, 22 Feb 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/emacs/index.xml" rel="self" type="application/rss+xml"/><item><title>Adding mu4e Actions</title><link>https://mrincon.net/posts/mu4e-actions/</link><pubDate>Wed, 22 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/mu4e-actions/</guid><description>&lt;p>
+I like text emails. To the point that I would argue that &lt;code>html&lt;/code> doesn&amp;#39;t add significant
+value to most messages. But sometimes it does. So I open those messages on my browser.
+Unfortunately, &lt;a href="https://en.wikipedia.org/wiki/Snap_(software)">snaps&lt;/a> cannot access the &lt;code>/temp/&lt;/code> directory, and by default, that&amp;#39;s the
+location Emacs and &lt;code>mu4e&lt;/code> use to save a message before calling the browser. Fortunately, the
+default behavior can be easily changed. Better yet, it&amp;#39;s easy to leverage that change to
+add new actions to &lt;code>mu4e&lt;/code>, like quickly converting an email into a &lt;code>pdf&lt;/code>.&lt;/p>
+&lt;p>
+The function &lt;code>mu4e-action-view-in-browser&lt;/code> does two things. First, it saves the &lt;code>html&lt;/code> part of
+an email into a temporary folder. Then, it calls the function associated with
+&lt;code>browse-url-browser-function&lt;/code> to opens the file. In Emacs the location of the temporary
+directory is set by the &lt;code>temporary-file-directory&lt;/code> variable. To open a file using a snap, I
+had to set the variable to something in my home directory. I thought about adding a new
+directory to the &lt;code>.cache&lt;/code>, but I soon discovered that &lt;code>Firefox&lt;/code> doesn&amp;#39;t have access to it
+either&lt;sup class="footnote-reference">&lt;a id="footnote-reference-1" href="#footnote-1">1&lt;/a>&lt;/sup>. So I settled for the rather inelegant solution of creating a temporary
+directory inside Downloads.&lt;/p>
+&lt;div class="src src-emacs-lisp">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defvar&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span> &lt;span class="s">&amp;#34;~/Downloads/tmp-mu/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Location of temporary files for Emacs mu4e.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-open-email-in-browser&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">msg&lt;/span> &lt;span class="kp">&amp;amp;optional&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Show current MSG in browser if it includes an HTML-part.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">This is a wrapper function for `mu4e-action-view-in-browser`
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">needed to get around snaps inability to access the temp
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">directory. If SKIP-HEADERS is set, do not show include message
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">headers. The variables &lt;/span>&lt;span class="ss">`browse-url-browser-function&amp;#39;&lt;/span>&lt;span class="s">,
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">&lt;/span>&lt;span class="ss">`browse-url-handlers&amp;#39;&lt;/span>&lt;span class="s">, and &lt;/span>&lt;span class="ss">`browse-url-default-handlers&amp;#39;&lt;/span>&lt;span class="s">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">determine which browser function to use.&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let*&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">temporary-file-directory&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">unless&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">file-directory-p&lt;/span> &lt;span class="nv">temporary-file-directory&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">make-directory&lt;/span> &lt;span class="nv">temporary-file-directory&lt;/span> &lt;span class="no">t&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">mu4e-action-view-in-browser&lt;/span> &lt;span class="nv">msg&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">setq&lt;/span> &lt;span class="nv">mu4e-view-actions&lt;/span> &lt;span class="o">&amp;#39;&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="s">&amp;#34;capture message&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">mu4e-action-capture-message&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;view in browser&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">extra-open-email-in-browser&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;show this thread&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">mu4e-action-show-thread&lt;/span>&lt;span class="p">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+Having gone this far, I decided to go a bit further and create a function, which instead
+of opening the file, makes a &lt;code>pdf&lt;/code>.&lt;/p>
+&lt;div class="src src-emacs-lisp">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-email-to-pdf&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">msg&lt;/span> &lt;span class="kp">&amp;amp;optional&lt;/span> &lt;span class="nv">args&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Pdf temp file MSG to a new name with ARGS ignored.&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let*&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">async-shell-command-display-buffer&lt;/span> &lt;span class="no">nil&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">temp&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">format-time-string&lt;/span> &lt;span class="s">&amp;#34;~/Downloads/%Y-%m-%dT%H:%M.pdf&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">name&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">read-string&lt;/span> &lt;span class="s">&amp;#34;File name: &amp;#34;&lt;/span> &lt;span class="nv">temp&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">html&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">replace-regexp-in-string&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">regexp-quote&lt;/span> &lt;span class="s">&amp;#34;file://&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span> &lt;span class="nv">msg&lt;/span> &lt;span class="no">t&lt;/span> &lt;span class="no">t&lt;/span>&lt;span class="p">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">if&lt;/span> &lt;span class="nv">args&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">message&lt;/span> &lt;span class="s">&amp;#34;Additional optional argument was ignored when saving to PDF.&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">async-shell-command&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">concat&lt;/span> &lt;span class="s">&amp;#34;pandoc &amp;#34;&lt;/span> &lt;span class="nv">html&lt;/span> &lt;span class="s">&amp;#34; -o &amp;#34;&lt;/span> &lt;span class="nv">name&lt;/span>&lt;span class="p">))))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-print-email-to-pdf&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">msg&lt;/span> &lt;span class="kp">&amp;amp;optional&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Save current MSG as a pdf if it includes an HTML-part.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">If SKIP-HEADERS is set, do not show include message headers.&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let*&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">browse-url-browser-function&lt;/span> &lt;span class="ss">&amp;#39;extra-email-to-pdf&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">mu4e-action-view-in-browser&lt;/span> &lt;span class="nv">msg&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+And another function to save the &lt;code>html&lt;/code> part of the email.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>defun extra-move-temp-email-location &lt;span class="o">(&lt;/span>msg &lt;span class="p">&amp;amp;&lt;/span>optional args&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;Move and rename temp file MSG to a new location with ARGS ignored.&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>let* &lt;span class="o">((&lt;/span>temp &lt;span class="o">(&lt;/span>format-time-string &lt;span class="o">(&lt;/span>concat extra-temp-email-dir
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;%Y-%m-%dT%H:%M.html&amp;#34;&lt;/span>&lt;span class="o">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>name &lt;span class="o">(&lt;/span>read-string &lt;span class="s2">&amp;#34;File name: &amp;#34;&lt;/span> temp&lt;span class="o">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>file &lt;span class="o">(&lt;/span>replace-regexp-in-string &lt;span class="o">(&lt;/span>regexp-quote &lt;span class="s2">&amp;#34;file://&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span> msg t t&lt;span class="o">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="k">if&lt;/span> args &lt;span class="o">(&lt;/span>message &lt;span class="s2">&amp;#34;Additional optional argument was ignored when saving to HTML.&amp;#34;&lt;/span>&lt;span class="o">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>rename-file file name&lt;span class="o">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>defun extra-save-email-html &lt;span class="o">(&lt;/span>msg &lt;span class="p">&amp;amp;&lt;/span>optional skip-headers&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;Save current MSG HTML-part.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s2">If SKIP-HEADERS is set, do not show include message headers.&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>let* &lt;span class="o">((&lt;/span>extra-temp-email-dir &lt;span class="s2">&amp;#34;~/Downloads/&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>browse-url-browser-function &lt;span class="s1">&amp;#39;extra-move-temp-email-location))
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s1"> (mu4e-action-view-in-browser msg skip-headers)))
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s1">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s1">(setq mu4e-view-actions &amp;#39;&lt;/span>&lt;span class="o">((&lt;/span>&lt;span class="s2">&amp;#34;capture message&amp;#34;&lt;/span> . mu4e-action-capture-message&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;view in browser&amp;#34;&lt;/span> . extra-open-email-in-browser&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;download as html&amp;#34;&lt;/span> . extra-save-email-html&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;print to PDF&amp;#34;&lt;/span> . extra-print-email-to-pdf&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;show this thread&amp;#34;&lt;/span> . mu4e-action-show-thread&lt;span class="o">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+And another function to clean the temporary files.&lt;/p>
+&lt;div class="src src-emacs-lisp">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-clean-temp-email-directory&lt;/span> &lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Remove all files from DIR if possible.&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let*&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">files&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">directory-files&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="no">t&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">directory-files-no-dot-files-regexp&lt;/span>&lt;span class="p">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">dolist&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">file&lt;/span> &lt;span class="nv">files&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">condition-case&lt;/span> &lt;span class="no">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nf">delete-file&lt;/span> &lt;span class="nv">file&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="ne">error&lt;/span> &lt;span class="no">nil&lt;/span>&lt;span class="p">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">condition-case&lt;/span> &lt;span class="no">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">delete-directory&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="ne">error&lt;/span> &lt;span class="no">nil&lt;/span>&lt;span class="p">))))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nv">add-hook&lt;/span> &lt;span class="ss">&amp;#39;kill-emacs-hook&lt;/span> &lt;span class="ss">&amp;#39;extra-clean-temp-email-directory&lt;/span>&lt;span class="p">)&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;p>
+So now, after opening an email, I can call &lt;code>mu4e-view-action&lt;/code> and print the email or save
+it. And if all goes well, after closing Emacs, I won&amp;#39;t have a temporary folder in my
+Downloads directory.&lt;/p>
+&lt;p>
+Finally, to encourage the use to text over &lt;code>html&lt;/code> on emails, I added two more lines to my
+configuration.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>setq mm-discouraged-alternatives &lt;span class="o">(&lt;/span>list &lt;span class="s2">&amp;#34;image/.*&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;text/html&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;text/richtext&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> gnus-inhibit-images t&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;div class="footnotes">
+&lt;hr class="footnotes-separatator">
+&lt;div class="footnote-definitions">
+&lt;div class="footnote-definition">
+&lt;sup id="footnote-1">&lt;a href="#footnote-reference-1">1&lt;/a>&lt;/sup>
+&lt;div class="footnote-body">
+&lt;p>I hope the benefits of Snaps offset the frustrating access rights, auto updates,
+and other myriad of tiny annoyances —in addition to the fact that &lt;code>apt install&lt;/code> sneakily
+contacts the snap store but makes you use &lt;code>snap refresh&lt;/code>, because you know, &lt;code>apt&lt;/code>, &lt;code>apt-get&lt;/code>,
+&lt;code>cargo&lt;/code>, and &lt;code>pip&lt;/code> are just not enough.&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;/div></description></item><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-tracking/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-tracking/</guid><description>&lt;p>
 December is the season to mail and receive packages. To keep track of them, I create a
 &lt;code>TODO&lt;/code> item for each package in an Emacs&amp;#39; org file. I make note of the mailing date, the
 content of the package, and the tracking number. The advantage of using Emacs is that a
