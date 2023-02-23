@@ -1,0 +1,125 @@
+#+title: Adding mu4e Actions
+#+date: 2023-02-22
+#+draft: false
+#+tags[]: emacs
+
+I like text emails. To the point that I would argue that ~html~ doesn't add significant
+value to most messages. But sometimes it does. So I open those messages on my browser.
+Unfortunately, [[https://en.wikipedia.org/wiki/Snap_(software)][snaps]] cannot access the ~/temp/~ directory, and by default, that's the
+location Emacs and ~mu4e~ use to save a message before calling the browser. Fortunately, the
+default behavior can be easily changed. Better yet, it's easy to leverage that change to
+add new actions to ~mu4e~, like quickly converting an email into a ~pdf~.
+# more
+
+The function ~mu4e-action-view-in-browser~ does two things. First, it saves the ~html~ part of
+an email into a temporary folder. Then, it calls the function associated with
+~browse-url-browser-function~ to opens the file. In Emacs the location of the temporary
+directory is set by the ~temporary-file-directory~ variable. To open a file using a snap, I
+had to set the variable to something in my home directory. I thought about adding a new
+directory to the ~.cache~, but I soon discovered that ~Firefox~ doesn't have access to it
+either[fn:SNAP]. So I settled for the rather inelegant solution of creating a temporary
+directory inside Downloads.
+
+#+begin_src emacs-lisp :tangle yes
+(defvar extra-temp-email-dir "~/Downloads/tmp-mu/"
+  "Location of temporary files for Emacs mu4e.")
+
+(defun extra-open-email-in-browser (msg &optional skip-headers)
+  "Show current MSG in browser if it includes an HTML-part.
+This is a wrapper function for `mu4e-action-view-in-browser`
+needed to get around snaps inability to access the temp
+directory. If SKIP-HEADERS is set, do not show include message
+headers. The variables `browse-url-browser-function',
+`browse-url-handlers', and `browse-url-default-handlers'
+determine which browser function to use."
+  (let* ((temporary-file-directory extra-temp-email-dir))
+    (unless (file-directory-p temporary-file-directory)
+      (make-directory temporary-file-directory t))
+    (mu4e-action-view-in-browser msg skip-headers)))
+
+(setq mu4e-view-actions '(("capture message"  . mu4e-action-capture-message)
+                          ("view in browser"  . extra-open-email-in-browser)
+                          ("show this thread" . mu4e-action-show-thread)))
+#+end_src
+
+Having gone this far, I decided to go a bit further and create a function, which instead
+of opening the file, makes a ~pdf~.
+
+#+begin_src emacs-lisp :tangle yes
+(defun extra-email-to-pdf (msg &optional args)
+  "Pdf temp file MSG to a new name with ARGS ignored."
+  (let* ((async-shell-command-display-buffer nil)
+         (temp (format-time-string "~/Downloads/%Y-%m-%dT%H:%M.pdf"))
+         (name (read-string "File name: " temp))
+         (html (replace-regexp-in-string (regexp-quote "file://") "" msg t t)))
+    (if args (message "Additional optional argument was ignored when saving to PDF."))
+    (async-shell-command (concat "pandoc " html " -o " name))))
+
+(defun extra-print-email-to-pdf (msg &optional skip-headers)
+  "Save current MSG as a pdf if it includes an HTML-part.
+If SKIP-HEADERS is set, do not show include message headers."
+  (let* ((browse-url-browser-function  'extra-email-to-pdf))
+    (mu4e-action-view-in-browser msg skip-headers)))
+#+end_src
+
+And another function to save the ~html~ part of the email.
+
+#+begin_src sh
+(defun extra-move-temp-email-location (msg &optional args)
+  "Move and rename temp file MSG to a new location with ARGS ignored."
+  (let* ((temp (format-time-string (concat extra-temp-email-dir
+                                           "%Y-%m-%dT%H:%M.html")))
+         (name (read-string "File name: " temp))
+         (file (replace-regexp-in-string (regexp-quote "file://") "" msg t t)))
+    (if args (message "Additional optional argument was ignored when saving to HTML."))
+    (rename-file file name)))
+
+(defun extra-save-email-html (msg &optional skip-headers)
+  "Save current MSG HTML-part.
+If SKIP-HEADERS is set, do not show include message headers."
+  (let* ((extra-temp-email-dir "~/Downloads/")
+         (browse-url-browser-function  'extra-move-temp-email-location))
+    (mu4e-action-view-in-browser msg skip-headers)))
+
+(setq mu4e-view-actions '(("capture message"  . mu4e-action-capture-message)
+                          ("view in browser"  . extra-open-email-in-browser)
+                          ("download as html"  . extra-save-email-html)
+                          ("print to PDF"  . extra-print-email-to-pdf)
+                          ("show this thread" . mu4e-action-show-thread)))
+#+end_src
+
+And another function to clean the temporary files.
+
+#+begin_src emacs-lisp :tangle yes
+(defun extra-clean-temp-email-directory ()
+  "Remove all files from DIR if possible."
+  (let* ((files (directory-files extra-temp-email-dir
+                                 t
+                                 directory-files-no-dot-files-regexp)))
+    (dolist (file files)
+      (condition-case nil
+          (delete-file file)
+        (error nil)))
+    (condition-case nil
+        (delete-directory extra-temp-email-dir)
+      (error nil))))
+
+(add-hook 'kill-emacs-hook 'extra-clean-temp-email-directory)
+#+end_src
+
+So now, after opening an email, I can call ~mu4e-view-action~ and print the email or save
+it. And if all goes well, after closing Emacs, I won't have a temporary folder in my
+Downloads directory.
+
+Finally, to encourage the use to text over ~html~ on emails, I added two more lines to my
+configuration.
+
+#+begin_src sh
+(setq mm-discouraged-alternatives (list "image/.*" "text/html" "text/richtext")
+      gnus-inhibit-images t
+#+end_src
+
+[fn:SNAP] I hope the benefits of Snaps offset the frustrating access rights, auto updates,
+and other myriad of tiny annoyances —in addition to the fact that ~apt install~ sneakily
+contacts the snap store but makes you use ~snap refresh~, because you know, ~apt~, ~apt-get~,
+~cargo~, and ~pip~ are just not enough.
