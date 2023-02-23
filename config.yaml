@@ -31,6 +31,9 @@ menu:
   - name: GitHub
     url: https://github.com/foxfriday
     weight: 5
+  - name: Mastodon
+    url: https://indieweb.social/@mrincon
+    weight: 6
 
 taxonomies:
    tag: tags
