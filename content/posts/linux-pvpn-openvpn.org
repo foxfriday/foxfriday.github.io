@@ -30,8 +30,8 @@ mapfile -t WG < <(nmcli con show | grep wireguard | cut -d' ' -f1 | tr '\n' ' ' 
 # No ipv6, auto connect to first only
 AUTOCONNECT=yes
 for CONN in "${WG[@]}"; do
-    echo nmcli con modify "${CONN}" ipv6.method "disabled"
-    echo nmcli con mod "${CONN}" connection.autoconnect "${AUTOCONNECT}"
+    nmcli con modify "${CONN}" ipv6.method "disabled"
+    nmcli con mod "${CONN}" connection.autoconnect "${AUTOCONNECT}"
     AUTOCONNECT=no
 done
 

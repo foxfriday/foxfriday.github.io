@@ -1,0 +1,25 @@
+#+title: Evil and the Built-In Tree Sitter
+#+date: 2023-03-25
+#+draft: false
+#+tags[]: emacs
+
+The new Emacs 29 support for tree sitter awesome. Since I'm an [[https://github.com/emacs-evil/evil][evil]] user, I made a small
+[[https://github.com/foxfriday/evil-ts][package]] to take advantage of the new facilities. If you are interested, the package is on
+[[https://github.com/foxfriday/evil-ts][GitHub here]]. From the ~README~:
+
+This package provides some basic additional actions for ~evil-mode~ using the new built-in
+tree sitter library. The package only works with Emacs 29 or greater. To activate, just
+run ~M-x evil-ts-mode~. This was so easy to do, that it hardly merits a package. But perhaps
+it will be useful to someone.
+# more
+
+In visual mode, you can select a ~if/try/etc statement~ with ~s~. So when you are inside an if
+statement, the sequence ~vas~ will select it. Similarly, ~f~ selects a function and ~c~ selects
+a class. On these cases, there is no difference between inner and outer text objects.
+
+In normal state, you can move to the beginning or the end of a class with ~[c~ and ~]c~.
+Similarly, ~[f~ and ~]f~ moves you to the start or end of a function. And ~[w~ moves you to the
+start of a sentence, and ~]w~ to the end (these last two bindings are not great, but ~]s~ is
+usually taken for navigating spelling errors). I created this package for my own personal
+use, so the default bindings may not be what you want. Of course, you can change that. The
+mode map is ~evil-ts-mode-map~.
