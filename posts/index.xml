@@ -1,5 +1,23 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on M. Rincón</title><link>https://mrincon.net/posts/</link><description>Recent content in Posts on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Wed, 22 Feb 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Adding mu4e Actions</title><link>https://mrincon.net/posts/mu4e-actions/</link><pubDate>Wed, 22 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/mu4e-actions/</guid><description>&lt;h1 class="title">&lt;p>Adding mu4e Actions&lt;/p>
-&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on M. Rincón</title><link>https://mrincon.net/posts/</link><description>Recent content in Posts on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Sat, 25 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Evil and the Built-In Tree Sitter</title><link>https://mrincon.net/posts/evil-ts/</link><pubDate>Sat, 25 Mar 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/evil-ts/</guid><description>&lt;p>
+The new Emacs 29 support for tree sitter awesome. Since I&amp;#39;m an &lt;a href="https://github.com/emacs-evil/evil">evil&lt;/a> user, I made a small
+&lt;a href="https://github.com/foxfriday/evil-ts">package&lt;/a> to take advantage of the new facilities. If you are interested, the package is on
+&lt;a href="https://github.com/foxfriday/evil-ts">GitHub here&lt;/a>. From the &lt;code>README&lt;/code>:&lt;/p>
+&lt;p>
+This package provides some basic additional actions for &lt;code>evil-mode&lt;/code> using the new built-in
+tree sitter library. The package only works with Emacs 29 or greater. To activate, just
+run &lt;code>M-x evil-ts-mode&lt;/code>. This was so easy to do, that it hardly merits a package. But perhaps
+it will be useful to someone.&lt;/p>
+&lt;p>
+In visual mode, you can select a &lt;code>if/try/etc statement&lt;/code> with &lt;code>s&lt;/code>. So when you are inside an if
+statement, the sequence &lt;code>vas&lt;/code> will select it. Similarly, &lt;code>f&lt;/code> selects a function and &lt;code>c&lt;/code> selects
+a class. On these cases, there is no difference between inner and outer text objects.&lt;/p>
+&lt;p>
+In normal state, you can move to the beginning or the end of a class with &lt;code>[c&lt;/code> and &lt;code>]c&lt;/code>.
+Similarly, &lt;code>[f&lt;/code> and &lt;code>]f&lt;/code> moves you to the start or end of a function. And &lt;code>[w&lt;/code> moves you to the
+start of a sentence, and &lt;code>]w&lt;/code> to the end (these last two bindings are not great, but &lt;code>]s&lt;/code> is
+usually taken for navigating spelling errors). I created this package for my own personal
+use, so the default bindings may not be what you want. Of course, you can change that. The
+mode map is &lt;code>evil-ts-mode-map&lt;/code>.&lt;/p></description></item><item><title>Adding mu4e Actions</title><link>https://mrincon.net/posts/mu4e-actions/</link><pubDate>Wed, 22 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/mu4e-actions/</guid><description>&lt;h1 class="title">Adding mu4e Actions&lt;/h1>
 &lt;p>
 I like text emails. To the point that I would argue that &lt;code>html&lt;/code> doesn&amp;#39;t add significant
 value to most messages. But sometimes it does. So I open those messages on my browser.
@@ -274,8 +292,8 @@ default connection, I changed that. In addition, I disabled &lt;code>IPv6&lt;/co
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># No ipv6, auto connect to first only&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="o">=&lt;/span>yes
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> CONN in &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">WG&lt;/span>&lt;span class="p">[@]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">do&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> nmcli con modify &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> ipv6.method &lt;span class="s2">&amp;#34;disabled&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> nmcli con mod &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> connection.autoconnect &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> nmcli con modify &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> ipv6.method &lt;span class="s2">&amp;#34;disabled&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> nmcli con mod &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> connection.autoconnect &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="o">=&lt;/span>no
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">

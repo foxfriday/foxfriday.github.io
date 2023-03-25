@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset=utf-8><title>Evil and the Built-In Tree Sitter - M. Rincón</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=preload href=https://mrincon.net/fonts/Mona-Sans.woff2 as=font type=font/woff2 crossorigin><link rel=stylesheet type=text/css media=screen href=https://mrincon.net/css/light.css><link rel=stylesheet type=text/css media=screen href=https://mrincon.net/css/syntax.css></head><body><div class="container wrapper post"><div class=header><base href=https://mrincon.net/><div class=site-description><h1 class=site-title><a href=https://mrincon.net/>M. Rincón
+</a>&mdash;
+<small>Guided by the asterik</small></h1></div><nav class=nav><ul class=flat><li><a href=/>Home</a></li><li><a href=posts/>Posts</a></li><li><a href=/tags>Tags</a></li><li><a href=/index.xml>Rss</a></li><li><a href=https://github.com/foxfriday>GitHub</a></li><li><a href=https://indieweb.social/@mrincon>Mastodon</a></li></ul></nav></div><div class=post-header><h1 class=title>Evil and the Built-In Tree Sitter</h1><div class=meta>2023-03-25</div></div><div class=markdown><p>The new Emacs 29 support for tree sitter awesome. Since I'm an <a href=https://github.com/emacs-evil/evil>evil</a> user, I made a small
+<a href=https://github.com/foxfriday/evil-ts>package</a> to take advantage of the new facilities. If you are interested, the package is on
+<a href=https://github.com/foxfriday/evil-ts>GitHub here</a>. From the <code>README</code>:</p><p>This package provides some basic additional actions for <code>evil-mode</code> using the new built-in
+tree sitter library. The package only works with Emacs 29 or greater. To activate, just
+run <code>M-x evil-ts-mode</code>. This was so easy to do, that it hardly merits a package. But perhaps
+it will be useful to someone.</p><p>In visual mode, you can select a <code>if/try/etc statement</code> with <code>s</code>. So when you are inside an if
+statement, the sequence <code>vas</code> will select it. Similarly, <code>f</code> selects a function and <code>c</code> selects
+a class. On these cases, there is no difference between inner and outer text objects.</p><p>In normal state, you can move to the beginning or the end of a class with <code>[c</code> and <code>]c</code>.
+Similarly, <code>[f</code> and <code>]f</code> moves you to the start or end of a function. And <code>[w</code> moves you to the
+start of a sentence, and <code>]w</code> to the end (these last two bindings are not great, but <code>]s</code> is
+usually taken for navigating spelling errors). I created this package for my own personal
+use, so the default bindings may not be what you want. Of course, you can change that. The
+mode map is <code>evil-ts-mode-map</code>.</p></div><div class=post-tags><nav class="nav tags"><ul class=flat><li><a href=/tags/emacs>emacs</a></li></ul></nav></div></div><div class="footer wrapper"><nav class=nav><div>All content by M. Rincón
+is licensed under
+<a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target=_blank rel="license noopener noreferrer" style=display:inline-block>CC BY 4.0</a></div></nav></div></body></html>

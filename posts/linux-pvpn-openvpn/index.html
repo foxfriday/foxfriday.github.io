@@ -29,8 +29,8 @@ default connection, I changed that. In addition, I disabled <code>IPv6</code> on
 </span></span><span class=line><span class=cl><span class=c1># No ipv6, auto connect to first only</span>
 </span></span><span class=line><span class=cl><span class=nv>AUTOCONNECT</span><span class=o>=</span>yes
 </span></span><span class=line><span class=cl><span class=k>for</span> CONN in <span class=s2>&#34;</span><span class=si>${</span><span class=nv>WG</span><span class=p>[@]</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>;</span> <span class=k>do</span>
-</span></span><span class=line><span class=cl>    <span class=nb>echo</span> nmcli con modify <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> ipv6.method <span class=s2>&#34;disabled&#34;</span>
-</span></span><span class=line><span class=cl>    <span class=nb>echo</span> nmcli con mod <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> connection.autoconnect <span class=s2>&#34;</span><span class=si>${</span><span class=nv>AUTOCONNECT</span><span class=si>}</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl>    nmcli con modify <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> ipv6.method <span class=s2>&#34;disabled&#34;</span>
+</span></span><span class=line><span class=cl>    nmcli con mod <span class=s2>&#34;</span><span class=si>${</span><span class=nv>CONN</span><span class=si>}</span><span class=s2>&#34;</span> connection.autoconnect <span class=s2>&#34;</span><span class=si>${</span><span class=nv>AUTOCONNECT</span><span class=si>}</span><span class=s2>&#34;</span>
 </span></span><span class=line><span class=cl>    <span class=nv>AUTOCONNECT</span><span class=o>=</span>no
 </span></span><span class=line><span class=cl><span class=k>done</span>
 </span></span><span class=line><span class=cl>
