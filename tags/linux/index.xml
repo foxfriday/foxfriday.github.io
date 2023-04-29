@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>linux on M. Rincón</title><link>https://mrincon.net/tags/linux/</link><description>Recent content in linux on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Tue, 21 Feb 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Making ProtonVPN Usable on Linux</title><link>https://mrincon.net/posts/linux-pvpn-openvpn/</link><pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/linux-pvpn-openvpn/</guid><description>&lt;p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>linux on M. Rincón</title><link>https://mrincon.net/tags/linux/</link><description>Recent content in linux on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Tue, 21 Feb 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Making ProtonVPN Usable on Linux</title><link>https://mrincon.net/posts/pvpn/</link><pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/pvpn/</guid><description>&lt;p>
 ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
 unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
 unless the kill switch is deleted using &lt;code>nmcli&lt;/code>. And the command line application has a
@@ -10,38 +10,13 @@ First, installed &lt;code>Wireguard&lt;/code>. Then, I logged into &lt;code>Prot
 made and downloaded a few &lt;code>Wireguard&lt;/code> configuration files. Once downloaded, I added the
 connections using &lt;code>NetworkManager&lt;/code>.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli con import &lt;span class="nb">type&lt;/span> wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli con import &lt;span class="nb">type&lt;/span> wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 By default, all &lt;code>wireguard&lt;/code> connections will auto connect on start up. Since I only want one
 default connection, I changed that. In addition, I disabled &lt;code>IPv6&lt;/code> on all the connection.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The first value will be set as default + autoconnect&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The first value will be set as default + autoconnect&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># No ipv6, auto connect to first only&lt;/span>
@@ -54,27 +29,12 @@ default connection, I changed that. In addition, I disabled &lt;code>IPv6&lt;/co
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Autoconnect Settings:&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli -f name,autoconnect connection&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli -f name,autoconnect connection&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> to configure one. First I disabled connections outside my &lt;code>LAN&lt;/code>.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;span class="lnt">3
-&lt;/span>&lt;span class="lnt">4
-&lt;/span>&lt;span class="lnt">5
-&lt;/span>&lt;span class="lnt">6
-&lt;/span>&lt;span class="lnt">7
-&lt;/span>&lt;span class="lnt">8
-&lt;/span>&lt;span class="lnt">9
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ip address &lt;span class="p">|&lt;/span> grep inet
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw reset
@@ -82,43 +42,13 @@ I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> 
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw default deny incoming
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># whitelist the range found with ip address&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow in to 192.168.1.0/24
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to 192.168.1.0/24&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to 192.168.1.0/24&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 Because I wanted to be able to reconnect without turning off the firewall, I also made
 exceptions for the &lt;code>VPN&lt;/code> connections.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;span class="lnt">16
-&lt;/span>&lt;span class="lnt">17
-&lt;/span>&lt;span class="lnt">18
-&lt;/span>&lt;span class="lnt">19
-&lt;/span>&lt;span class="lnt">20
-&lt;/span>&lt;span class="lnt">21
-&lt;/span>&lt;span class="lnt">22
-&lt;/span>&lt;span class="lnt">23
-&lt;/span>&lt;span class="lnt">24
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> CONN in &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">WG&lt;/span>&lt;span class="p">[@]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">do&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> mapfile -t EP &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>grep endpoint &amp;lt;
@@ -141,33 +71,13 @@ exceptions for the &lt;code>VPN&lt;/code> connections.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Enable ufw if needed&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">{&lt;/span> ufw status &lt;span class="p">|&lt;/span> grep inactive&lt;span class="p">;&lt;/span> &lt;span class="o">}&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> ufw &lt;span class="nb">enable&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Rules:&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw status verbose&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw status verbose&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 At this point there shouldn&amp;#39;t be any connection outside the &lt;code>LAN&lt;/code> unless I have a &lt;code>VPN&lt;/code>
 connections.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ping google should fail&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ping google should fail&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ping 8.8.8.8
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># but work after vpn is activate&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli --ask con up &amp;lt;vpn name&amp;gt;
@@ -180,9 +90,7 @@ connections.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">do&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> curl &lt;span class="s2">&amp;#34;https://&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">session&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nv">0&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nv">40&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">-&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">i&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">.ipleak.net/dnsdetection/&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sleep &lt;span class="m">1&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 And that&amp;#39;s that. If I need to disable the &lt;code>VPN&lt;/code> I can easily do that, and things should work

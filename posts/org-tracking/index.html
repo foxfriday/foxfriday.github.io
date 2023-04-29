@@ -1,70 +1,184 @@
-<!doctype html><html><head><meta charset=utf-8><title>Tracking Packages With Org-Mode - M. Rincón</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=preload href=https://mrincon.net/fonts/Mona-Sans.woff2 as=font type=font/woff2 crossorigin><link rel=stylesheet type=text/css media=screen href=https://mrincon.net/css/light.css><link rel=stylesheet type=text/css media=screen href=https://mrincon.net/css/syntax.css></head><body><div class="container wrapper post"><div class=header><base href=https://mrincon.net/><div class=site-description><h1 class=site-title><a href=https://mrincon.net/>M. Rincón
-</a>&mdash;
-<small>Guided by the asterik</small></h1></div><nav class=nav><ul class=flat><li><a href=/>Home</a></li><li><a href=posts/>Posts</a></li><li><a href=/tags>Tags</a></li><li><a href=/index.xml>Rss</a></li><li><a href=https://github.com/foxfriday>GitHub</a></li><li><a href=https://indieweb.social/@mrincon>Mastodon</a></li></ul></nav></div><div class=post-header><h1 class=title>Tracking Packages With Org-Mode</h1><div class=meta>2022-12-06</div></div><div class=markdown><p>December is the season to mail and receive packages. To keep track of them, I create a
-<code>TODO</code> item for each package in an Emacs' org file. I make note of the mailing date, the
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <meta charset="utf-8" /><title>Tracking Packages With Org-Mode - M. Rincón</title><meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="preload" href="https://foxfriday.github.io/fonts/Mona-Sans.woff2" as="font" type="font/woff2" crossorigin>
+  
+  
+  <link rel="stylesheet" type="text/css" media="screen" href="https://foxfriday.github.io/css/light.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="https://foxfriday.github.io/css/syntax.css" />
+  
+  
+</head>
+
+  
+  
+  <body>
+    <div class="container wrapper post">
+      
+<div class="header">
+  <base href="https://foxfriday.github.io/">
+
+  <div class="site-description">
+    <h1 class="site-title">
+      
+      <a href="https://foxfriday.github.io/">
+        M. Rincón
+      </a>&mdash;
+      <small>
+        Guided by the asterik
+      </small></h1>
+  </div>
+
+  <nav class="nav">
+    <ul class="flat">
+      
+      <li>
+	<a href="/">Home</a>
+      </li>
+      
+      <li>
+	<a href="posts/">Posts</a>
+      </li>
+      
+      <li>
+	<a href="/tags">Tags</a>
+      </li>
+      
+      <li>
+	<a href="/index.xml">Rss</a>
+      </li>
+      
+      <li>
+	<a href="https://github.com/foxfriday">GitHub</a>
+      </li>
+      
+    </ul>
+  </nav>
+</div>
+
+
+      <div class="post-header">
+	<h1 class="title">Tracking Packages With Org-Mode</h1>
+	<div class="meta">
+          2022-12-06
+          
+          
+        </div>
+      </div>
+
+      <div class="markdown">
+	<p>
+December is the season to mail and receive packages. To keep track of them, I create a
+<code>TODO</code> item for each package in an Emacs&#39; org file. I make note of the mailing date, the
 content of the package, and the tracking number. The advantage of using Emacs is that a
-few line of code can make the tracking numbers clickable.</p><div class="src src-emacs-lisp"><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
-</span><span class=lnt> 2
-</span><span class=lnt> 3
-</span><span class=lnt> 4
-</span><span class=lnt> 5
-</span><span class=lnt> 6
-</span><span class=lnt> 7
-</span><span class=lnt> 8
-</span><span class=lnt> 9
-</span><span class=lnt>10
-</span><span class=lnt>11
-</span><span class=lnt>12
-</span><span class=lnt>13
-</span><span class=lnt>14
-</span><span class=lnt>15
-</span><span class=lnt>16
-</span><span class=lnt>17
-</span><span class=lnt>18
-</span><span class=lnt>19
-</span><span class=lnt>20
-</span><span class=lnt>21
-</span><span class=lnt>22
-</span><span class=lnt>23
-</span><span class=lnt>24
-</span><span class=lnt>25
-</span><span class=lnt>26
-</span><span class=lnt>27
-</span><span class=lnt>28
-</span><span class=lnt>29
-</span><span class=lnt>30
-</span><span class=lnt>31
-</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-emacs-lisp data-lang=emacs-lisp><span class=line><span class=cl><span class=p>(</span><span class=nb>defun</span> <span class=nv>org-link-track-ups</span> <span class=p>(</span><span class=nv>path</span> <span class=nv>arg</span><span class=p>)</span>
-</span></span><span class=line><span class=cl>  <span class=s>&#34;Track a ups package where PATH is the tracking number.&#34;</span>
-</span></span><span class=line><span class=cl>  <span class=p>(</span><span class=nv>browse-url</span>
-</span></span><span class=line><span class=cl>   <span class=p>(</span><span class=nv>url-encode-url</span>
-</span></span><span class=line><span class=cl>    <span class=p>(</span><span class=nf>concat</span> <span class=s>&#34;https://www.ups.com/track?loc=en_US&amp;tracknum=&#34;</span> <span class=nv>path</span><span class=p>))</span>
-</span></span><span class=line><span class=cl>   <span class=nv>arg</span><span class=p>))</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=p>(</span><span class=nb>defun</span> <span class=nv>org-link-track-usps</span> <span class=p>(</span><span class=nv>path</span> <span class=nv>arg</span><span class=p>)</span>
-</span></span><span class=line><span class=cl>  <span class=s>&#34;Track a usps package where PATH is the tracking number.&#34;</span>
-</span></span><span class=line><span class=cl>  <span class=p>(</span><span class=nv>browse-url</span>
-</span></span><span class=line><span class=cl>   <span class=p>(</span><span class=nv>url-encode-url</span>
-</span></span><span class=line><span class=cl>    <span class=p>(</span><span class=nf>concat</span> <span class=s>&#34;https://tools.usps.com/go/TrackConfirmAction.action?tLabels=&#34;</span>
-</span></span><span class=line><span class=cl>            <span class=nv>path</span><span class=p>))</span>
-</span></span><span class=line><span class=cl>   <span class=nv>arg</span><span class=p>))</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=p>(</span><span class=nb>defun</span> <span class=nv>org-link-track-fedex</span> <span class=p>(</span><span class=nv>path</span> <span class=nv>arg</span><span class=p>)</span>
-</span></span><span class=line><span class=cl>  <span class=s>&#34;Track a fedex package where PATH is the tracking number.&#34;</span>
-</span></span><span class=line><span class=cl>  <span class=p>(</span><span class=nv>browse-url</span>
-</span></span><span class=line><span class=cl>   <span class=p>(</span><span class=nv>url-encode-url</span>
-</span></span><span class=line><span class=cl>    <span class=p>(</span><span class=nf>concat</span> <span class=s>&#34;https://www.fedex.com/fedextrack/?trknbr=&#34;</span> <span class=nv>path</span><span class=p>))</span>
-</span></span><span class=line><span class=cl>   <span class=nv>arg</span><span class=p>))</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=p>(</span><span class=nv>org-link-set-parameters</span> <span class=s>&#34;ups&#34;</span>
-</span></span><span class=line><span class=cl>                         <span class=nb>:follow</span> <span class=ss>&#39;org-link-track-ups</span>
-</span></span><span class=line><span class=cl>                         <span class=nb>:face</span> <span class=o>&#39;</span><span class=p>(</span><span class=nb>:foreground</span> <span class=s>&#34;green&#34;</span> <span class=nb>:underline</span> <span class=no>t</span><span class=p>))</span>
-</span></span><span class=line><span class=cl><span class=p>(</span><span class=nv>org-link-set-parameters</span> <span class=s>&#34;usps&#34;</span>
-</span></span><span class=line><span class=cl>                         <span class=nb>:follow</span> <span class=ss>&#39;org-link-track-usps</span>
-</span></span><span class=line><span class=cl>                         <span class=nb>:face</span> <span class=o>&#39;</span><span class=p>(</span><span class=nb>:foreground</span> <span class=s>&#34;green&#34;</span> <span class=nb>:underline</span> <span class=no>t</span><span class=p>))</span>
-</span></span><span class=line><span class=cl><span class=p>(</span><span class=nv>org-link-set-parameters</span> <span class=s>&#34;fedex&#34;</span>
-</span></span><span class=line><span class=cl>                         <span class=nb>:follow</span> <span class=ss>&#39;org-link-track-fedex</span>
-</span></span><span class=line><span class=cl>                         <span class=nb>:face</span> <span class=o>&#39;</span><span class=p>(</span><span class=nb>:foreground</span> <span class=s>&#34;green&#34;</span> <span class=nb>:underline</span> <span class=no>t</span><span class=p>))</span></span></span></code></pre></td></tr></table></div></div></div><p>Then, I can just type <code>[[ups:&lt;tracking number]]</code> in an org file and <code>open-at-point</code>
-lets me know where is my package.</p></div><div class=post-tags><nav class="nav tags"><ul class=flat><li><a href=/tags/emacs>emacs</a></li></ul></nav></div></div><div class="footer wrapper"><nav class=nav><div>All content by M. Rincón
-is licensed under
-<a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target=_blank rel="license noopener noreferrer" style=display:inline-block>CC BY 4.0</a></div></nav></div></body></html>
+few line of code can make the tracking numbers clickable.</p>
+<div class="src src-emacs-lisp">
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">defun</span> <span class="nv">org-link-track-ups</span> <span class="p">(</span><span class="nv">path</span> <span class="nv">arg</span><span class="p">)</span>
+  <span class="s">&#34;Track a ups package where PATH is the tracking number.&#34;</span>
+  <span class="p">(</span><span class="nv">browse-url</span>
+   <span class="p">(</span><span class="nv">url-encode-url</span>
+    <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;https://www.ups.com/track?loc=en_US&amp;tracknum=&#34;</span> <span class="nv">path</span><span class="p">))</span>
+   <span class="nv">arg</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nb">defun</span> <span class="nv">org-link-track-usps</span> <span class="p">(</span><span class="nv">path</span> <span class="nv">arg</span><span class="p">)</span>
+  <span class="s">&#34;Track a usps package where PATH is the tracking number.&#34;</span>
+  <span class="p">(</span><span class="nv">browse-url</span>
+   <span class="p">(</span><span class="nv">url-encode-url</span>
+    <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;https://tools.usps.com/go/TrackConfirmAction.action?tLabels=&#34;</span>
+            <span class="nv">path</span><span class="p">))</span>
+   <span class="nv">arg</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nb">defun</span> <span class="nv">org-link-track-fedex</span> <span class="p">(</span><span class="nv">path</span> <span class="nv">arg</span><span class="p">)</span>
+  <span class="s">&#34;Track a fedex package where PATH is the tracking number.&#34;</span>
+  <span class="p">(</span><span class="nv">browse-url</span>
+   <span class="p">(</span><span class="nv">url-encode-url</span>
+    <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;https://www.fedex.com/fedextrack/?trknbr=&#34;</span> <span class="nv">path</span><span class="p">))</span>
+   <span class="nv">arg</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">org-link-set-parameters</span> <span class="s">&#34;ups&#34;</span>
+                         <span class="nb">:follow</span> <span class="ss">&#39;org-link-track-ups</span>
+                         <span class="nb">:face</span> <span class="o">&#39;</span><span class="p">(</span><span class="nb">:foreground</span> <span class="s">&#34;green&#34;</span> <span class="nb">:underline</span> <span class="no">t</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">org-link-set-parameters</span> <span class="s">&#34;usps&#34;</span>
+                         <span class="nb">:follow</span> <span class="ss">&#39;org-link-track-usps</span>
+                         <span class="nb">:face</span> <span class="o">&#39;</span><span class="p">(</span><span class="nb">:foreground</span> <span class="s">&#34;green&#34;</span> <span class="nb">:underline</span> <span class="no">t</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">org-link-set-parameters</span> <span class="s">&#34;fedex&#34;</span>
+                         <span class="nb">:follow</span> <span class="ss">&#39;org-link-track-fedex</span>
+                         <span class="nb">:face</span> <span class="o">&#39;</span><span class="p">(</span><span class="nb">:foreground</span> <span class="s">&#34;green&#34;</span> <span class="nb">:underline</span> <span class="no">t</span><span class="p">))</span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+Then, I can just type <code>[[ups:&lt;tracking number]]</code> in an org file and <code>open-at-point</code>
+lets me know where is my package.</p>
+      </div>
+
+      <div class="post-tags">
+	
+	
+	<nav class="nav tags">
+	  <ul class="flat">
+	    
+	    <li><a href="/tags/emacs">emacs</a></li>
+	    
+	  </ul>
+	</nav>
+	
+	
+      </div>
+    </div>
+    <div class="footer wrapper">
+  <nav class="nav">
+    <div>
+      All content by  M. Rincón 
+      is licensed under
+      <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
+         target="_blank"
+         rel="license noopener noreferrer"
+         style="display:inline-block;">
+        CC BY 4.0
+      </a>
+    </div>
+  </nav>
+</div>
+
+  </body>
+</html>

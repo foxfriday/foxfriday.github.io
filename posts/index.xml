@@ -17,8 +17,7 @@ Similarly, &lt;code>[f&lt;/code> and &lt;code>]f&lt;/code> moves you to the star
 start of a sentence, and &lt;code>]w&lt;/code> to the end (these last two bindings are not great, but &lt;code>]s&lt;/code> is
 usually taken for navigating spelling errors). I created this package for my own personal
 use, so the default bindings may not be what you want. Of course, you can change that. The
-mode map is &lt;code>evil-ts-mode-map&lt;/code>.&lt;/p></description></item><item><title>Adding mu4e Actions</title><link>https://mrincon.net/posts/mu4e-actions/</link><pubDate>Wed, 22 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/mu4e-actions/</guid><description>&lt;h1 class="title">Adding mu4e Actions&lt;/h1>
-&lt;p>
+mode map is &lt;code>evil-ts-mode-map&lt;/code>.&lt;/p></description></item><item><title>Adding mu4e Actions</title><link>https://mrincon.net/posts/mu4e-actions/</link><pubDate>Wed, 22 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/mu4e-actions/</guid><description>&lt;p>
 I like text emails. To the point that I would argue that &lt;code>html&lt;/code> doesn&amp;#39;t add significant
 value to most messages. But sometimes it does. So I open those messages on my browser.
 Unfortunately, &lt;a href="https://en.wikipedia.org/wiki/Snap_(software)">snaps&lt;/a> cannot access the &lt;code>/temp/&lt;/code> directory, and by default, that&amp;#39;s the
@@ -35,30 +34,7 @@ directory to the &lt;code>.cache&lt;/code>, but I soon discovered that &lt;code>
 either&lt;sup class="footnote-reference">&lt;a id="footnote-reference-1" href="#footnote-1">1&lt;/a>&lt;/sup>. So I settled for the rather inelegant solution of creating a temporary
 directory inside Downloads.&lt;/p>
 &lt;div class="src src-emacs-lisp">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;span class="lnt">16
-&lt;/span>&lt;span class="lnt">17
-&lt;/span>&lt;span class="lnt">18
-&lt;/span>&lt;span class="lnt">19
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defvar&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span> &lt;span class="s">&amp;#34;~/Downloads/tmp-mu/&amp;#34;&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defvar&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span> &lt;span class="s">&amp;#34;~/Downloads/tmp-mu/&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Location of temporary files for Emacs mu4e.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-open-email-in-browser&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">msg&lt;/span> &lt;span class="kp">&amp;amp;optional&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)&lt;/span>
@@ -76,33 +52,13 @@ directory inside Downloads.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">setq&lt;/span> &lt;span class="nv">mu4e-view-actions&lt;/span> &lt;span class="o">&amp;#39;&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="s">&amp;#34;capture message&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">mu4e-action-capture-message&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;view in browser&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">extra-open-email-in-browser&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;show this thread&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">mu4e-action-show-thread&lt;/span>&lt;span class="p">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;show this thread&amp;#34;&lt;/span> &lt;span class="o">.&lt;/span> &lt;span class="nv">mu4e-action-show-thread&lt;/span>&lt;span class="p">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 Having gone this far, I decided to go a bit further and create a function, which instead
 of opening the file, makes a &lt;code>pdf&lt;/code>.&lt;/p>
 &lt;div class="src src-emacs-lisp">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-email-to-pdf&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">msg&lt;/span> &lt;span class="kp">&amp;amp;optional&lt;/span> &lt;span class="nv">args&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-email-to-pdf&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">msg&lt;/span> &lt;span class="kp">&amp;amp;optional&lt;/span> &lt;span class="nv">args&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Pdf temp file MSG to a new name with ARGS ignored.&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let*&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">async-shell-command-display-buffer&lt;/span> &lt;span class="no">nil&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">temp&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">format-time-string&lt;/span> &lt;span class="s">&amp;#34;~/Downloads/%Y-%m-%dT%H:%M.pdf&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span>
@@ -115,39 +71,12 @@ of opening the file, makes a &lt;code>pdf&lt;/code>.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Save current MSG as a pdf if it includes an HTML-part.
 &lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">If SKIP-HEADERS is set, do not show include message headers.&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let*&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">browse-url-browser-function&lt;/span> &lt;span class="ss">&amp;#39;extra-email-to-pdf&lt;/span>&lt;span class="p">))&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">mu4e-action-view-in-browser&lt;/span> &lt;span class="nv">msg&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">mu4e-action-view-in-browser&lt;/span> &lt;span class="nv">msg&lt;/span> &lt;span class="nv">skip-headers&lt;/span>&lt;span class="p">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 And another function to save the &lt;code>html&lt;/code> part of the email.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;span class="lnt">16
-&lt;/span>&lt;span class="lnt">17
-&lt;/span>&lt;span class="lnt">18
-&lt;/span>&lt;span class="lnt">19
-&lt;/span>&lt;span class="lnt">20
-&lt;/span>&lt;span class="lnt">21
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>defun extra-move-temp-email-location &lt;span class="o">(&lt;/span>msg &lt;span class="p">&amp;amp;&lt;/span>optional args&lt;span class="o">)&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>defun extra-move-temp-email-location &lt;span class="o">(&lt;/span>msg &lt;span class="p">&amp;amp;&lt;/span>optional args&lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;Move and rename temp file MSG to a new location with ARGS ignored.&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>let* &lt;span class="o">((&lt;/span>temp &lt;span class="o">(&lt;/span>format-time-string &lt;span class="o">(&lt;/span>concat extra-temp-email-dir
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;%Y-%m-%dT%H:%M.html&amp;#34;&lt;/span>&lt;span class="o">)))&lt;/span>
@@ -167,33 +96,12 @@ And another function to save the &lt;code>html&lt;/code> part of the email.&lt;/
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;view in browser&amp;#34;&lt;/span> . extra-open-email-in-browser&lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;download as html&amp;#34;&lt;/span> . extra-save-email-html&lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;print to PDF&amp;#34;&lt;/span> . extra-print-email-to-pdf&lt;span class="o">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;show this thread&amp;#34;&lt;/span> . mu4e-action-show-thread&lt;span class="o">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>&lt;span class="s2">&amp;#34;show this thread&amp;#34;&lt;/span> . mu4e-action-show-thread&lt;span class="o">)))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 And another function to clean the temporary files.&lt;/p>
 &lt;div class="src src-emacs-lisp">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-clean-temp-email-directory&lt;/span> &lt;span class="p">()&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">extra-clean-temp-email-directory&lt;/span> &lt;span class="p">()&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Remove all files from DIR if possible.&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">when&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">file-directory-p&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nb">let&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="nv">files&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">directory-files&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span>
@@ -207,9 +115,7 @@ And another function to clean the temporary files.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">delete-directory&lt;/span> &lt;span class="nv">extra-temp-email-dir&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="ne">error&lt;/span> &lt;span class="no">nil&lt;/span>&lt;span class="p">)))))&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nv">add-hook&lt;/span> &lt;span class="ss">&amp;#39;kill-emacs-hook&lt;/span> &lt;span class="ss">&amp;#39;extra-clean-temp-email-directory&lt;/span>&lt;span class="p">)&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nv">add-hook&lt;/span> &lt;span class="ss">&amp;#39;kill-emacs-hook&lt;/span> &lt;span class="ss">&amp;#39;extra-clean-temp-email-directory&lt;/span>&lt;span class="p">)&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 So now, after opening an email, I can call &lt;code>mu4e-view-action&lt;/code> and print the email or save
@@ -219,16 +125,8 @@ Downloads directory.&lt;/p>
 Finally, to encourage the use to text over &lt;code>html&lt;/code> on emails, I added two more lines to my
 configuration.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>setq mm-discouraged-alternatives &lt;span class="o">(&lt;/span>list &lt;span class="s2">&amp;#34;image/.*&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;text/html&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;text/richtext&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> gnus-inhibit-images t&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>setq mm-discouraged-alternatives &lt;span class="o">(&lt;/span>list &lt;span class="s2">&amp;#34;image/.*&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;text/html&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;text/richtext&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> gnus-inhibit-images t&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;div class="footnotes">
 &lt;hr class="footnotes-separatator">
@@ -243,7 +141,7 @@ contacts the snap store but makes you use &lt;code>snap refresh&lt;/code>, becau
 &lt;/div>
 &lt;/div>
 &lt;/div>
-&lt;/div></description></item><item><title>Making ProtonVPN Usable on Linux</title><link>https://mrincon.net/posts/linux-pvpn-openvpn/</link><pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/linux-pvpn-openvpn/</guid><description>&lt;p>
+&lt;/div></description></item><item><title>Making ProtonVPN Usable on Linux</title><link>https://mrincon.net/posts/pvpn/</link><pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/pvpn/</guid><description>&lt;p>
 ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
 unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
 unless the kill switch is deleted using &lt;code>nmcli&lt;/code>. And the command line application has a
@@ -255,38 +153,13 @@ First, installed &lt;code>Wireguard&lt;/code>. Then, I logged into &lt;code>Prot
 made and downloaded a few &lt;code>Wireguard&lt;/code> configuration files. Once downloaded, I added the
 connections using &lt;code>NetworkManager&lt;/code>.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli con import &lt;span class="nb">type&lt;/span> wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli con import &lt;span class="nb">type&lt;/span> wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 By default, all &lt;code>wireguard&lt;/code> connections will auto connect on start up. Since I only want one
 default connection, I changed that. In addition, I disabled &lt;code>IPv6&lt;/code> on all the connection.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The first value will be set as default + autoconnect&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The first value will be set as default + autoconnect&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># No ipv6, auto connect to first only&lt;/span>
@@ -299,27 +172,12 @@ default connection, I changed that. In addition, I disabled &lt;code>IPv6&lt;/co
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Autoconnect Settings:&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli -f name,autoconnect connection&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli -f name,autoconnect connection&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> to configure one. First I disabled connections outside my &lt;code>LAN&lt;/code>.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;span class="lnt">3
-&lt;/span>&lt;span class="lnt">4
-&lt;/span>&lt;span class="lnt">5
-&lt;/span>&lt;span class="lnt">6
-&lt;/span>&lt;span class="lnt">7
-&lt;/span>&lt;span class="lnt">8
-&lt;/span>&lt;span class="lnt">9
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ip address &lt;span class="p">|&lt;/span> grep inet
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw reset
@@ -327,43 +185,13 @@ I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> 
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw default deny incoming
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># whitelist the range found with ip address&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow in to 192.168.1.0/24
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to 192.168.1.0/24&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to 192.168.1.0/24&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 Because I wanted to be able to reconnect without turning off the firewall, I also made
 exceptions for the &lt;code>VPN&lt;/code> connections.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;span class="lnt">16
-&lt;/span>&lt;span class="lnt">17
-&lt;/span>&lt;span class="lnt">18
-&lt;/span>&lt;span class="lnt">19
-&lt;/span>&lt;span class="lnt">20
-&lt;/span>&lt;span class="lnt">21
-&lt;/span>&lt;span class="lnt">22
-&lt;/span>&lt;span class="lnt">23
-&lt;/span>&lt;span class="lnt">24
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> CONN in &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">WG&lt;/span>&lt;span class="p">[@]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">do&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> mapfile -t EP &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>grep endpoint &amp;lt;
@@ -386,33 +214,13 @@ exceptions for the &lt;code>VPN&lt;/code> connections.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Enable ufw if needed&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">{&lt;/span> ufw status &lt;span class="p">|&lt;/span> grep inactive&lt;span class="p">;&lt;/span> &lt;span class="o">}&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> ufw &lt;span class="nb">enable&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Rules:&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw status verbose&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw status verbose&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 At this point there shouldn&amp;#39;t be any connection outside the &lt;code>LAN&lt;/code> unless I have a &lt;code>VPN&lt;/code>
 connections.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ping google should fail&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ping google should fail&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ping 8.8.8.8
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># but work after vpn is activate&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli --ask con up &amp;lt;vpn name&amp;gt;
@@ -425,54 +233,17 @@ connections.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">do&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> curl &lt;span class="s2">&amp;#34;https://&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">session&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nv">0&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nv">40&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">-&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">i&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">.ipleak.net/dnsdetection/&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sleep &lt;span class="m">1&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 And that&amp;#39;s that. If I need to disable the &lt;code>VPN&lt;/code> I can easily do that, and things should work
-as long as I also disable the firewall.&lt;/p></description></item><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-tracking/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-tracking/</guid><description>&lt;p>
+as long as I also disable the firewall.&lt;/p></description></item><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-pacakges/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-pacakges/</guid><description>&lt;p>
 December is the season to mail and receive packages. To keep track of them, I create a
 &lt;code>TODO&lt;/code> item for each package in an Emacs&amp;#39; org file. I make note of the mailing date, the
 content of the package, and the tracking number. The advantage of using Emacs is that a
 few line of code can make the tracking numbers clickable.&lt;/p>
 &lt;div class="src src-emacs-lisp">
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;span class="lnt">16
-&lt;/span>&lt;span class="lnt">17
-&lt;/span>&lt;span class="lnt">18
-&lt;/span>&lt;span class="lnt">19
-&lt;/span>&lt;span class="lnt">20
-&lt;/span>&lt;span class="lnt">21
-&lt;/span>&lt;span class="lnt">22
-&lt;/span>&lt;span class="lnt">23
-&lt;/span>&lt;span class="lnt">24
-&lt;/span>&lt;span class="lnt">25
-&lt;/span>&lt;span class="lnt">26
-&lt;/span>&lt;span class="lnt">27
-&lt;/span>&lt;span class="lnt">28
-&lt;/span>&lt;span class="lnt">29
-&lt;/span>&lt;span class="lnt">30
-&lt;/span>&lt;span class="lnt">31
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">org-link-track-ups&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">path&lt;/span> &lt;span class="nv">arg&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-emacs-lisp" data-lang="emacs-lisp">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nb">defun&lt;/span> &lt;span class="nv">org-link-track-ups&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">path&lt;/span> &lt;span class="nv">arg&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s">&amp;#34;Track a ups package where PATH is the tracking number.&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">browse-url&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">(&lt;/span>&lt;span class="nv">url-encode-url&lt;/span>
@@ -502,9 +273,7 @@ few line of code can make the tracking numbers clickable.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">:face&lt;/span> &lt;span class="o">&amp;#39;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">:foreground&lt;/span> &lt;span class="s">&amp;#34;green&amp;#34;&lt;/span> &lt;span class="nb">:underline&lt;/span> &lt;span class="no">t&lt;/span>&lt;span class="p">))&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="nv">org-link-set-parameters&lt;/span> &lt;span class="s">&amp;#34;fedex&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">:follow&lt;/span> &lt;span class="ss">&amp;#39;org-link-track-fedex&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">:face&lt;/span> &lt;span class="o">&amp;#39;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">:foreground&lt;/span> &lt;span class="s">&amp;#34;green&amp;#34;&lt;/span> &lt;span class="nb">:underline&lt;/span> &lt;span class="no">t&lt;/span>&lt;span class="p">))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">:face&lt;/span> &lt;span class="o">&amp;#39;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">:foreground&lt;/span> &lt;span class="s">&amp;#34;green&amp;#34;&lt;/span> &lt;span class="nb">:underline&lt;/span> &lt;span class="no">t&lt;/span>&lt;span class="p">))&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 Then, I can just type &lt;code>[[ups:&amp;lt;tracking number]]&lt;/code> in an org file and &lt;code>open-at-point&lt;/code>
