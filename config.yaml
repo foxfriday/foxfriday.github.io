@@ -12,11 +12,11 @@ params:
 markup:
   highlight:
     noClasses: false
-    lineNos: true
+    lineNos: false
 
 menu:
   main:
-  - name: Home
+  - name: About
     url: /
     weight: 1
   - name: Posts
@@ -25,15 +25,13 @@ menu:
   - name: Tags
     url: /tags
     weight: 3
-  - name: Rss
-    url: /index.xml
-    weight: 4
-  - name: GitHub
-    url: https://github.com/foxfriday
-    weight: 5
-  - name: Mastodon
-    url: https://indieweb.social/@mrincon
-    weight: 6
+  icons:
+  - name: rss
+    weight: 1
+  - name: github
+    weight: 2
+  - name: mastodon
+    weight: 3
 
 taxonomies:
    tag: tags
