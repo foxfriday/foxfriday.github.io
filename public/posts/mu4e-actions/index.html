@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <meta charset="utf-8" /><title>Adding mu4e Actions - M. Rincón</title><meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="preload" href="https://mrincon.net/fonts/Mona-Sans.woff2" as="font" type="font/woff2" crossorigin>
+  
+  
+  <link rel="stylesheet" type="text/css" media="screen" href="https://mrincon.net/css/light.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="https://mrincon.net/css/syntax.css" />
+  
+  
+</head>
+
+  
+  
+  <body>
+    <div class="container wrapper post">
+      
+<div class="header">
+  <base href="https://mrincon.net/">
+
+  <div class="site-description">
+    <h1 class="site-title">
+      
+      <a href="https://mrincon.net/">
+        M. Rincón
+      </a>&mdash;
+      <small>
+        Guided by the asterik
+      </small></h1>
+
+    <ul class="flat">
+      
+      <li>
+        <a href="" >
+          <object alt="rss" data="svg/rss.svg" type="image/svg+xml" ></object>
+        </a>
+      </li>
+      
+      <li>
+        <a href="" >
+          <object alt="github" data="svg/github.svg" type="image/svg+xml" ></object>
+        </a>
+      </li>
+      
+      <li>
+        <a href="" >
+          <object alt="mastodon" data="svg/mastodon.svg" type="image/svg+xml" ></object>
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <nav class="nav">
+    <ul class="flat">
+      
+      <li>
+	<a href="/" >About</a>
+      </li>
+      
+      <li>
+	<a href="posts/" >Posts</a>
+      </li>
+      
+      <li>
+	<a href="/tags" >Tags</a>
+      </li>
+      
+    </ul>
+  </nav>
+</div>
+
+
+      <div class="post-header">
+	<h1 class="title">Adding mu4e Actions</h1>
+	<div class="meta">
+          2023-02-22
+          
+          
+        </div>
+      </div>
+
+      <div class="markdown">
+	<p>
+I like text emails. To the point that I would argue that <code>html</code> doesn&#39;t add significant
+value to most messages. But sometimes it does. So I open those messages on my browser.
+Unfortunately, <a href="https://en.wikipedia.org/wiki/Snap_(software)">snaps</a> cannot access the <code>/temp/</code> directory, and by default, that&#39;s the
+location Emacs and <code>mu4e</code> use to save a message before calling the browser. Fortunately, the
+default behavior can be easily changed. Better yet, it&#39;s easy to leverage that change to
+add new actions to <code>mu4e</code>, like quickly converting an email into a <code>pdf</code>.</p>
+<p>
+The function <code>mu4e-action-view-in-browser</code> does two things. First, it saves the <code>html</code> part of
+an email into a temporary folder. Then, it calls the function associated with
+<code>browse-url-browser-function</code> to opens the file. In Emacs the location of the temporary
+directory is set by the <code>temporary-file-directory</code> variable. To open a file using a snap, I
+had to set the variable to something in my home directory. I thought about adding a new
+directory to the <code>.cache</code>, but I soon discovered that <code>Firefox</code> doesn&#39;t have access to it
+either<sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>. So I settled for the rather inelegant solution of creating a temporary
+directory inside Downloads.</p>
+<div class="src src-emacs-lisp">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">defvar</span> <span class="nv">extra-temp-email-dir</span> <span class="s">&#34;~/Downloads/tmp-mu/&#34;</span>
+  <span class="s">&#34;Location of temporary files for Emacs mu4e.&#34;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nb">defun</span> <span class="nv">extra-open-email-in-browser</span> <span class="p">(</span><span class="nv">msg</span> <span class="kp">&amp;optional</span> <span class="nv">skip-headers</span><span class="p">)</span>
+  <span class="s">&#34;Show current MSG in browser if it includes an HTML-part.
+</span><span class="s">This is a wrapper function for `mu4e-action-view-in-browser`
+</span><span class="s">needed to get around snaps inability to access the temp
+</span><span class="s">directory. If SKIP-HEADERS is set, do not show include message
+</span><span class="s">headers. The variables </span><span class="ss">`browse-url-browser-function&#39;</span><span class="s">,
+</span><span class="s"></span><span class="ss">`browse-url-handlers&#39;</span><span class="s">, and </span><span class="ss">`browse-url-default-handlers&#39;</span><span class="s">
+</span><span class="s">determine which browser function to use.&#34;</span>
+  <span class="p">(</span><span class="nb">let*</span> <span class="p">((</span><span class="nv">temporary-file-directory</span> <span class="nv">extra-temp-email-dir</span><span class="p">))</span>
+    <span class="p">(</span><span class="nb">unless</span> <span class="p">(</span><span class="nf">file-directory-p</span> <span class="nv">temporary-file-directory</span><span class="p">)</span>
+      <span class="p">(</span><span class="nv">make-directory</span> <span class="nv">temporary-file-directory</span> <span class="no">t</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">mu4e-action-view-in-browser</span> <span class="nv">msg</span> <span class="nv">skip-headers</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nb">setq</span> <span class="nv">mu4e-view-actions</span> <span class="o">&#39;</span><span class="p">((</span><span class="s">&#34;capture message&#34;</span>  <span class="o">.</span> <span class="nv">mu4e-action-capture-message</span><span class="p">)</span>
+                          <span class="p">(</span><span class="s">&#34;view in browser&#34;</span>  <span class="o">.</span> <span class="nv">extra-open-email-in-browser</span><span class="p">)</span>
+                          <span class="p">(</span><span class="s">&#34;show this thread&#34;</span> <span class="o">.</span> <span class="nv">mu4e-action-show-thread</span><span class="p">)))</span></code></pre></div>
+</div>
+<p>
+Having gone this far, I decided to go a bit further and create a function, which instead
+of opening the file, makes a <code>pdf</code>.</p>
+<div class="src src-emacs-lisp">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">defun</span> <span class="nv">extra-email-to-pdf</span> <span class="p">(</span><span class="nv">msg</span> <span class="kp">&amp;optional</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="s">&#34;Pdf temp file MSG to a new name with ARGS ignored.&#34;</span>
+  <span class="p">(</span><span class="nb">let*</span> <span class="p">((</span><span class="nv">async-shell-command-display-buffer</span> <span class="no">nil</span><span class="p">)</span>
+         <span class="p">(</span><span class="nv">temp</span> <span class="p">(</span><span class="nf">format-time-string</span> <span class="s">&#34;~/Downloads/%Y-%m-%dT%H:%M.pdf&#34;</span><span class="p">))</span>
+         <span class="p">(</span><span class="nv">name</span> <span class="p">(</span><span class="nf">read-string</span> <span class="s">&#34;File name: &#34;</span> <span class="nv">temp</span><span class="p">))</span>
+         <span class="p">(</span><span class="nv">html</span> <span class="p">(</span><span class="nv">replace-regexp-in-string</span> <span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">&#34;file://&#34;</span><span class="p">)</span> <span class="s">&#34;&#34;</span> <span class="nv">msg</span> <span class="no">t</span> <span class="no">t</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nb">if</span> <span class="nv">args</span> <span class="p">(</span><span class="nf">message</span> <span class="s">&#34;Additional optional argument was ignored when saving to PDF.&#34;</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">async-shell-command</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;pandoc &#34;</span> <span class="nv">html</span> <span class="s">&#34; -o &#34;</span> <span class="nv">name</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nb">defun</span> <span class="nv">extra-print-email-to-pdf</span> <span class="p">(</span><span class="nv">msg</span> <span class="kp">&amp;optional</span> <span class="nv">skip-headers</span><span class="p">)</span>
+  <span class="s">&#34;Save current MSG as a pdf if it includes an HTML-part.
+</span><span class="s">If SKIP-HEADERS is set, do not show include message headers.&#34;</span>
+  <span class="p">(</span><span class="nb">let*</span> <span class="p">((</span><span class="nv">browse-url-browser-function</span>  <span class="ss">&#39;extra-email-to-pdf</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">mu4e-action-view-in-browser</span> <span class="nv">msg</span> <span class="nv">skip-headers</span><span class="p">)))</span></code></pre></div>
+</div>
+<p>
+And another function to save the <code>html</code> part of the email.</p>
+<div class="src src-sh">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="o">(</span>defun extra-move-temp-email-location <span class="o">(</span>msg <span class="p">&amp;</span>optional args<span class="o">)</span>
+  <span class="s2">&#34;Move and rename temp file MSG to a new location with ARGS ignored.&#34;</span>
+  <span class="o">(</span>let* <span class="o">((</span>temp <span class="o">(</span>format-time-string <span class="o">(</span>concat extra-temp-email-dir
+                                           <span class="s2">&#34;%Y-%m-%dT%H:%M.html&#34;</span><span class="o">)))</span>
+         <span class="o">(</span>name <span class="o">(</span>read-string <span class="s2">&#34;File name: &#34;</span> temp<span class="o">))</span>
+         <span class="o">(</span>file <span class="o">(</span>replace-regexp-in-string <span class="o">(</span>regexp-quote <span class="s2">&#34;file://&#34;</span><span class="o">)</span> <span class="s2">&#34;&#34;</span> msg t t<span class="o">)))</span>
+    <span class="o">(</span><span class="k">if</span> args <span class="o">(</span>message <span class="s2">&#34;Additional optional argument was ignored when saving to HTML.&#34;</span><span class="o">))</span>
+    <span class="o">(</span>rename-file file name<span class="o">)))</span>
+
+<span class="o">(</span>defun extra-save-email-html <span class="o">(</span>msg <span class="p">&amp;</span>optional skip-headers<span class="o">)</span>
+  <span class="s2">&#34;Save current MSG HTML-part.
+</span><span class="s2">If SKIP-HEADERS is set, do not show include message headers.&#34;</span>
+  <span class="o">(</span>let* <span class="o">((</span>extra-temp-email-dir <span class="s2">&#34;~/Downloads/&#34;</span><span class="o">)</span>
+         <span class="o">(</span>browse-url-browser-function  <span class="s1">&#39;extra-move-temp-email-location))
+</span><span class="s1">    (mu4e-action-view-in-browser msg skip-headers)))
+</span><span class="s1">
+</span><span class="s1">(setq mu4e-view-actions &#39;</span><span class="o">((</span><span class="s2">&#34;capture message&#34;</span>  . mu4e-action-capture-message<span class="o">)</span>
+                          <span class="o">(</span><span class="s2">&#34;view in browser&#34;</span>  . extra-open-email-in-browser<span class="o">)</span>
+                          <span class="o">(</span><span class="s2">&#34;download as html&#34;</span>  . extra-save-email-html<span class="o">)</span>
+                          <span class="o">(</span><span class="s2">&#34;print to PDF&#34;</span>  . extra-print-email-to-pdf<span class="o">)</span>
+                          <span class="o">(</span><span class="s2">&#34;show this thread&#34;</span> . mu4e-action-show-thread<span class="o">)))</span></code></pre></div>
+</div>
+<p>
+And another function to clean the temporary files.</p>
+<div class="src src-emacs-lisp">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">defun</span> <span class="nv">extra-clean-temp-email-directory</span> <span class="p">()</span>
+  <span class="s">&#34;Remove all files from DIR if possible.&#34;</span>
+  <span class="p">(</span><span class="nb">when</span> <span class="p">(</span><span class="nf">file-directory-p</span> <span class="nv">extra-temp-email-dir</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">files</span> <span class="p">(</span><span class="nf">directory-files</span> <span class="nv">extra-temp-email-dir</span>
+                                  <span class="no">t</span>
+                                  <span class="nv">directory-files-no-dot-files-regexp</span><span class="p">)))</span>
+      <span class="p">(</span><span class="nb">dolist</span> <span class="p">(</span><span class="nv">file</span> <span class="nv">files</span><span class="p">)</span>
+        <span class="p">(</span><span class="nb">condition-case</span> <span class="no">nil</span>
+            <span class="p">(</span><span class="nf">delete-file</span> <span class="nv">file</span><span class="p">)</span>
+          <span class="p">(</span><span class="ne">error</span> <span class="no">nil</span><span class="p">)))</span>
+      <span class="p">(</span><span class="nb">condition-case</span> <span class="no">nil</span>
+          <span class="p">(</span><span class="nv">delete-directory</span> <span class="nv">extra-temp-email-dir</span><span class="p">)</span>
+        <span class="p">(</span><span class="ne">error</span> <span class="no">nil</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nv">add-hook</span> <span class="ss">&#39;kill-emacs-hook</span> <span class="ss">&#39;extra-clean-temp-email-directory</span><span class="p">)</span></code></pre></div>
+</div>
+<p>
+So now, after opening an email, I can call <code>mu4e-view-action</code> and print the email or save
+it. And if all goes well, after closing Emacs, I won&#39;t have a temporary folder in my
+Downloads directory.</p>
+<p>
+Finally, to encourage the use to text over <code>html</code> on emails, I added two more lines to my
+configuration.</p>
+<div class="src src-sh">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="o">(</span>setq mm-discouraged-alternatives <span class="o">(</span>list <span class="s2">&#34;image/.*&#34;</span> <span class="s2">&#34;text/html&#34;</span> <span class="s2">&#34;text/richtext&#34;</span><span class="o">)</span>
+      gnus-inhibit-images t</code></pre></div>
+</div>
+<div class="footnotes">
+<hr class="footnotes-separatator">
+<div class="footnote-definitions">
+<div class="footnote-definition">
+<sup id="footnote-1"><a href="#footnote-reference-1">1</a></sup>
+<div class="footnote-body">
+<p>I hope the benefits of Snaps offset the frustrating access rights, auto updates,
+and other myriad of tiny annoyances —in addition to the fact that <code>apt install</code> sneakily
+contacts the snap store but makes you use <code>snap refresh</code>, because you know, <code>apt</code>, <code>apt-get</code>,
+<code>cargo</code>, and <code>pip</code> are just not enough.</p>
+</div>
+</div>
+</div>
+</div>
+      </div>
+
+      <div class="post-tags">
+	
+	
+	<nav class="nav tags">
+	  <ul class="flat">
+	    
+	    <li><a href="/tags/emacs">emacs</a></li>
+	    
+	  </ul>
+	</nav>
+	
+	
+      </div>
+    </div>
+    <div class="footer wrapper">
+  <nav class="nav">
+    <div>
+      All content by  M. Rincón 
+      is licensed under
+      <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
+         target="_blank"
+         rel="license noopener noreferrer"
+         style="display:inline-block;">
+        CC BY 4.0
+      </a>
+    </div>
+  </nav>
+</div>
+
+  </body>
+</html>

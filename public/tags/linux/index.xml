@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>linux on M. Rincón</title>
+    <link>https://mrincon.net/tags/linux/</link>
+    <description>Recent content in linux on M. Rincón</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>M. Rincón</copyright>
+    <lastBuildDate>Tue, 21 Feb 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Making ProtonVPN Usable on Linux</title>
+      <link>https://mrincon.net/posts/pvpn/</link>
+      <pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrincon.net/posts/pvpn/</guid>
+      <description>&lt;p&gt;
+ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
+unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
+unless the kill switch is deleted using &lt;code&gt;nmcli&lt;/code&gt;. And the command line application has a
+&lt;a href=&#34;https://github.com/ProtonVPN/linux-cli/issues/62&#34;&gt;bizarre dependency&lt;/a&gt; on &lt;code&gt;nm-applet&lt;/code&gt;, which of course means it cannot be used on a headless
+machine. Brilliant. And it &lt;a href=&#34;https://github.com/ProtonVPN/linux-app/issues/49&#34;&gt;appears&lt;/a&gt; that &lt;code&gt;ProtonVPN&lt;/code&gt; is not going to fix this. The solution
+is to use &lt;code&gt;ProtonVPN&lt;/code&gt; with &lt;code&gt;Wireguard&lt;/code&gt; —or better yet, find a provider that cares about Linux.&lt;/p&gt;
+&lt;p&gt;
+First, installed &lt;code&gt;Wireguard&lt;/code&gt;. Then, I logged into &lt;code&gt;ProtonVPN&lt;/code&gt;, and in the download section,
+made and downloaded a few &lt;code&gt;Wireguard&lt;/code&gt; configuration files. Once downloaded, I added the
+connections using &lt;code&gt;NetworkManager&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;nmcli con import &lt;span class=&#34;nb&#34;&gt;type&lt;/span&gt; wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+By default, all &lt;code&gt;wireguard&lt;/code&gt; connections will auto connect on start up. Since I only want one
+default connection, I changed that. In addition, I disabled &lt;code&gt;IPv6&lt;/code&gt; on all the connection.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# The first value will be set as default + autoconnect&lt;/span&gt;
+mapfile -t WG &amp;lt; &amp;lt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;nmcli con show &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep wireguard &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; cut -d&lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; -f1 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tr &lt;span class=&#34;s1&#34;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# No ipv6, auto connect to first only&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;AUTOCONNECT&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;yes
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; CONN in &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;WG&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+    nmcli con modify &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; ipv6.method &lt;span class=&#34;s2&#34;&gt;&amp;#34;disabled&amp;#34;&lt;/span&gt;
+    nmcli con mod &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; connection.autoconnect &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AUTOCONNECT&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;AUTOCONNECT&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;no
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Autoconnect Settings:&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;
+nmcli -f name,autoconnect connection&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+I also wanted a &lt;code&gt;killswitch&lt;/code&gt;, so I used &lt;code&gt;ufw&lt;/code&gt; to configure one. First I disabled connections outside my &lt;code&gt;LAN&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span&gt;
+ip address &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep inet
+
+ufw reset
+ufw default deny outgoing
+ufw default deny incoming
+&lt;span class=&#34;c1&#34;&gt;# whitelist the range found with ip address&lt;/span&gt;
+ufw allow in to 192.168.1.0/24
+ufw allow out to 192.168.1.0/24&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Because I wanted to be able to reconnect without turning off the firewall, I also made
+exceptions for the &lt;code&gt;VPN&lt;/code&gt; connections.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;mapfile -t WG &amp;lt; &amp;lt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;nmcli con show &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep wireguard &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; cut -d&lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; -f1 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tr &lt;span class=&#34;s1&#34;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; CONN in &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;WG&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+   mapfile -t EP &amp;lt; &amp;lt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;grep endpoint &amp;lt;
+         /etc/NetworkManager/system-connections/&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;.nmconnection &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+         cut -d&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; -f2 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+         tr : &lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+   &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;[[&lt;/span&gt; -v EP&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;0&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;]]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;[[&lt;/span&gt; -v EP&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;]]&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;then&lt;/span&gt;
+       ufw allow out to &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;EP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[0]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; port &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;EP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[1]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; proto udp
+       &lt;span class=&#34;c1&#34;&gt;# send everything on VPN tunnel (equivalent to tun0 for openVPN)&lt;/span&gt;
+       ufw allow out on &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; from any to any
+       &lt;span class=&#34;c1&#34;&gt;# Enable for bit torrent&lt;/span&gt;
+       &lt;span class=&#34;c1&#34;&gt;# ufw allow in on &amp;#34;${CONN}&amp;#34; from any to any&lt;/span&gt;
+   &lt;span class=&#34;k&#34;&gt;else&lt;/span&gt;
+       &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Unable to determine endpoint for &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &amp;gt;&lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;
+       &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Skipped&amp;#34;&lt;/span&gt; &amp;gt;&lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;
+       contninue
+   &lt;span class=&#34;k&#34;&gt;fi&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# Enable ufw if needed&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;{&lt;/span&gt; ufw status &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep inactive&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; ufw &lt;span class=&#34;nb&#34;&gt;enable&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Rules:&amp;#34;&lt;/span&gt;
+ufw status verbose&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+At this point there shouldn&amp;#39;t be any connection outside the &lt;code&gt;LAN&lt;/code&gt; unless I have a &lt;code&gt;VPN&lt;/code&gt;
+connections.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# ping google should fail&lt;/span&gt;
+ping 8.8.8.8
+&lt;span class=&#34;c1&#34;&gt;# but work after vpn is activate&lt;/span&gt;
+nmcli --ask con up &amp;lt;vpn name&amp;gt;
+ping google
+&lt;span class=&#34;c1&#34;&gt;# we can also check for leaks&lt;/span&gt;
+curl https://ipleak.net/json/ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; bat -l json
+&lt;span class=&#34;c1&#34;&gt;# and in the DNS&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;session&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; mrfox &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; sha1sum&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; i in &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;seq &lt;span class=&#34;m&#34;&gt;5000&lt;/span&gt; 5003&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+   curl &lt;span class=&#34;s2&#34;&gt;&amp;#34;https://&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;session&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;40&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;.ipleak.net/dnsdetection/&amp;#34;&lt;/span&gt;
+   sleep &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+And that&amp;#39;s that. If I need to disable the &lt;code&gt;VPN&lt;/code&gt; I can easily do that, and things should work
+as long as I also disable the firewall.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

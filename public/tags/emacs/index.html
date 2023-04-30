@@ -4,12 +4,12 @@
   <meta charset="utf-8" /><title>emacs - M. Rincón</title><meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="preload" href="https://foxfriday.github.io/fonts/Mona-Sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://mrincon.net/fonts/Mona-Sans.woff2" as="font" type="font/woff2" crossorigin>
   
-  <link rel="alternate" type="application/rss+xml" href="https://foxfriday.github.io/tags/emacs/index.xml" title="M. Rincón" />
+  <link rel="alternate" type="application/rss+xml" href="https://mrincon.net/tags/emacs/index.xml" title="M. Rincón" />
   
-  <link rel="stylesheet" type="text/css" media="screen" href="https://foxfriday.github.io/css/light.css" />
-  <link rel="stylesheet" type="text/css" media="screen" href="https://foxfriday.github.io/css/syntax.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="https://mrincon.net/css/light.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="https://mrincon.net/css/syntax.css" />
   
   
 </head>
@@ -19,40 +19,54 @@
     <div class="container wrapper list">
       
 <div class="header">
-  <base href="https://foxfriday.github.io/">
+  <base href="https://mrincon.net/">
 
   <div class="site-description">
     <h1 class="site-title">
       
-      <a href="https://foxfriday.github.io/">
+      <a href="https://mrincon.net/">
         M. Rincón
       </a>&mdash;
       <small>
         Guided by the asterik
       </small></h1>
+
+    <ul class="flat">
+      
+      <li>
+        <a href="" >
+          <object alt="rss" data="svg/rss.svg" type="image/svg+xml" ></object>
+        </a>
+      </li>
+      
+      <li>
+        <a href="" >
+          <object alt="github" data="svg/github.svg" type="image/svg+xml" ></object>
+        </a>
+      </li>
+      
+      <li>
+        <a href="" >
+          <object alt="mastodon" data="svg/mastodon.svg" type="image/svg+xml" ></object>
+        </a>
+      </li>
+      
+    </ul>
   </div>
 
   <nav class="nav">
     <ul class="flat">
       
       <li>
-	<a href="/">Home</a>
+	<a href="/" >About</a>
       </li>
       
       <li>
-	<a href="posts/">Posts</a>
+	<a href="posts/" >Posts</a>
       </li>
       
       <li>
-	<a href="/tags">Tags</a>
-      </li>
-      
-      <li>
-	<a href="/index.xml">Rss</a>
-      </li>
-      
-      <li>
-	<a href="https://github.com/foxfriday">GitHub</a>
+	<a href="/tags" >Tags</a>
       </li>
       
     </ul>
@@ -71,11 +85,63 @@
 	<div class="post">
           <p>
           <div class="meta">
+            2023-03-25
+            
+            
+          </div>
+          <a class="title" href="/posts/evil-ts/">
+            Evil and the Built-In Tree Sitter
+          </a>
+          -
+          <span class="description">
+            
+            <p>
+The new Emacs 29 support for tree sitter awesome. Since I&#39;m an <a href="https://github.com/emacs-evil/evil">evil</a> user, I made a small
+<a href="https://github.com/foxfriday/evil-ts">package</a> to take advantage of the new facilities. If you are interested, the package is on
+<a href="https://github.com/foxfriday/evil-ts">GitHub here</a>. From the <code>README</code>:</p>
+<p>
+This package provides some basic additional actions for <code>evil-mode</code> using the new built-in
+tree sitter library. The package only works with Emacs 29 or greater. To activate, just
+run <code>M-x evil-ts-mode</code>. This was so easy to do, that it hardly merits a package. But perhaps
+it will be useful to someone.</p>&hellip;
+            
+          </span>
+          </p>
+	</div>
+        
+	<div class="post">
+          <p>
+          <div class="meta">
+            2023-02-22
+            
+            
+          </div>
+          <a class="title" href="/posts/mu4e-actions/">
+            Adding mu4e Actions
+          </a>
+          -
+          <span class="description">
+            
+            <p>
+I like text emails. To the point that I would argue that <code>html</code> doesn&#39;t add significant
+value to most messages. But sometimes it does. So I open those messages on my browser.
+Unfortunately, <a href="https://en.wikipedia.org/wiki/Snap_(software)">snaps</a> cannot access the <code>/temp/</code> directory, and by default, that&#39;s the
+location Emacs and <code>mu4e</code> use to save a message before calling the browser. Fortunately, the
+default behavior can be easily changed. Better yet, it&#39;s easy to leverage that change to
+add new actions to <code>mu4e</code>, like quickly converting an email into a <code>pdf</code>.</p>&hellip;
+            
+          </span>
+          </p>
+	</div>
+        
+	<div class="post">
+          <p>
+          <div class="meta">
             2022-12-06
             
             
           </div>
-          <a class="title" href="/posts/org-tracking/">
+          <a class="title" href="/posts/org-pacakges/">
             Tracking Packages With Org-Mode
           </a>
           -

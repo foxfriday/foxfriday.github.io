@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-
 <html>
   <head>
-	<meta name="generator" content="Hugo 0.92.2" />
-  <meta charset="utf-8" /><title>M. Rincón - Guided by the asterik </title><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" /><title>linux - M. Rincón</title><meta name="viewport" content="width=device-width, initial-scale=1">
 
   
   <link rel="preload" href="https://mrincon.net/fonts/Mona-Sans.woff2" as="font" type="font/woff2" crossorigin>
   
-  <link rel="alternate" type="application/rss+xml" href="https://mrincon.net/index.xml" title="M. Rincón" />
+  <link rel="alternate" type="application/rss+xml" href="https://mrincon.net/tags/linux/index.xml" title="M. Rincón" />
   
   <link rel="stylesheet" type="text/css" media="screen" href="https://mrincon.net/css/light.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="https://mrincon.net/css/syntax.css" />
@@ -16,8 +14,9 @@
   
 </head>
 
+
   <body>
-    <div class="container wrapper">
+    <div class="container wrapper list">
       
 <div class="header">
   <base href="https://mrincon.net/">
@@ -74,21 +73,41 @@
   </nav>
 </div>
 
-      <div class="markdown">
-        <p>
-          You found a collection of post about things I find interesting,
-          things I used to find interesting, and things I thought I would
-          find interesting. I doubt you'll find much new here.
-        </p>
-        <h3 class="title">Colophon</h3>
-        <p>
-	  This website is built with <a href="https://gohugo.io/">Hugo</a>
-          and <a href="https://orgmode.org/">org-mode</a>. It is hosted at GitHub. The
-          theme is based on <a href="https://github.com/vividvilla/ezhil">Ezhil</a>. The
-          font is <a href="https://github.com/github/mona-sans">Mona Sans</a>. All bugs
-          and other horrors are likely my fault.
-        </p>
-      </div>
+
+      
+      <h1>/"linux"</h1>
+      
+
+      
+
+      <ul class="posts">
+        
+	<div class="post">
+          <p>
+          <div class="meta">
+            2023-02-21
+            
+            
+          </div>
+          <a class="title" href="/posts/pvpn/">
+            Making ProtonVPN Usable on Linux
+          </a>
+          -
+          <span class="description">
+            
+            <p>
+ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
+unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
+unless the kill switch is deleted using <code>nmcli</code>. And the command line application has a
+<a href="https://github.com/ProtonVPN/linux-cli/issues/62">bizarre dependency</a> on <code>nm-applet</code>, which of course means it cannot be used on a headless
+machine. Brilliant. And it <a href="https://github.com/ProtonVPN/linux-app/issues/49">appears</a> that <code>ProtonVPN</code> is not going to fix this. The solution
+is to use <code>ProtonVPN</code> with <code>Wireguard</code> —or better yet, find a provider that cares about Linux.</p>&hellip;
+            
+          </span>
+          </p>
+	</div></ul>
+    </div>
+
     <div class="footer wrapper">
   <nav class="nav">
     <div>
@@ -105,4 +124,5 @@
 </div>
 
   </body>
+
 </html>

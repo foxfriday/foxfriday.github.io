@@ -7,14 +7,10 @@
 }
 
 body {
-    font-family: 'Mona Sans', sans-serif;
     color: #000;
-    line-height: 1.5rem;
-    font-size: 1.0rem;
-}
-p {
     font-family: 'Mona Sans', sans-serif;
     font-size: 1.0rem;
+    line-height: 1.5rem;
 }
  /* links */
 a, a:hover {
@@ -91,23 +87,22 @@ ul.flat li {
 }
 
 .header nav {
-    height: 35px;
-    margin-top: 15px;
     background: #000;
-    vertical-align: middle;
-    line-height: normal;
-    text-indent: 10px;
     border-radius: 5px;
+    height: 35px;
+    line-height: normal;
+    margin-top: 15px;
+    text-indent: 10px;
+    vertical-align: middle;
 }
 
 .header nav a, .header nav a:hover {
-    color: #dcdcdc;
+    color: #ffff;
     text-decoration: none;
     word-break: break-all;
 }
 /* mouse over link */
 .header nav a:hover {
-    color: #dcdcdc;
     text-decoration: underline;
 }
 

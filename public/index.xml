@@ -2,23 +2,325 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>M. Rincón</title>
-    <link>https://foxfriday.github.io/</link>
+    <link>https://mrincon.net/</link>
     <description>Recent content on M. Rincón</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>M. Rincón</copyright>
-    <lastBuildDate>Tue, 06 Dec 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://foxfriday.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 25 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Evil and the Built-In Tree Sitter</title>
+      <link>https://mrincon.net/posts/evil-ts/</link>
+      <pubDate>Sat, 25 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrincon.net/posts/evil-ts/</guid>
+      <description>&lt;p&gt;
+The new Emacs 29 support for tree sitter awesome. Since I&amp;#39;m an &lt;a href=&#34;https://github.com/emacs-evil/evil&#34;&gt;evil&lt;/a&gt; user, I made a small
+&lt;a href=&#34;https://github.com/foxfriday/evil-ts&#34;&gt;package&lt;/a&gt; to take advantage of the new facilities. If you are interested, the package is on
+&lt;a href=&#34;https://github.com/foxfriday/evil-ts&#34;&gt;GitHub here&lt;/a&gt;. From the &lt;code&gt;README&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;
+This package provides some basic additional actions for &lt;code&gt;evil-mode&lt;/code&gt; using the new built-in
+tree sitter library. The package only works with Emacs 29 or greater. To activate, just
+run &lt;code&gt;M-x evil-ts-mode&lt;/code&gt;. This was so easy to do, that it hardly merits a package. But perhaps
+it will be useful to someone.&lt;/p&gt;
+&lt;p&gt;
+In visual mode, you can select a &lt;code&gt;if/try/etc statement&lt;/code&gt; with &lt;code&gt;s&lt;/code&gt;. So when you are inside an if
+statement, the sequence &lt;code&gt;vas&lt;/code&gt; will select it. Similarly, &lt;code&gt;f&lt;/code&gt; selects a function and &lt;code&gt;c&lt;/code&gt; selects
+a class. On these cases, there is no difference between inner and outer text objects.&lt;/p&gt;
+&lt;p&gt;
+In normal state, you can move to the beginning or the end of a class with &lt;code&gt;[c&lt;/code&gt; and &lt;code&gt;]c&lt;/code&gt;.
+Similarly, &lt;code&gt;[f&lt;/code&gt; and &lt;code&gt;]f&lt;/code&gt; moves you to the start or end of a function. And &lt;code&gt;[w&lt;/code&gt; moves you to the
+start of a sentence, and &lt;code&gt;]w&lt;/code&gt; to the end (these last two bindings are not great, but &lt;code&gt;]s&lt;/code&gt; is
+usually taken for navigating spelling errors). I created this package for my own personal
+use, so the default bindings may not be what you want. Of course, you can change that. The
+mode map is &lt;code&gt;evil-ts-mode-map&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Adding mu4e Actions</title>
+      <link>https://mrincon.net/posts/mu4e-actions/</link>
+      <pubDate>Wed, 22 Feb 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrincon.net/posts/mu4e-actions/</guid>
+      <description>&lt;p&gt;
+I like text emails. To the point that I would argue that &lt;code&gt;html&lt;/code&gt; doesn&amp;#39;t add significant
+value to most messages. But sometimes it does. So I open those messages on my browser.
+Unfortunately, &lt;a href=&#34;https://en.wikipedia.org/wiki/Snap_(software)&#34;&gt;snaps&lt;/a&gt; cannot access the &lt;code&gt;/temp/&lt;/code&gt; directory, and by default, that&amp;#39;s the
+location Emacs and &lt;code&gt;mu4e&lt;/code&gt; use to save a message before calling the browser. Fortunately, the
+default behavior can be easily changed. Better yet, it&amp;#39;s easy to leverage that change to
+add new actions to &lt;code&gt;mu4e&lt;/code&gt;, like quickly converting an email into a &lt;code&gt;pdf&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+The function &lt;code&gt;mu4e-action-view-in-browser&lt;/code&gt; does two things. First, it saves the &lt;code&gt;html&lt;/code&gt; part of
+an email into a temporary folder. Then, it calls the function associated with
+&lt;code&gt;browse-url-browser-function&lt;/code&gt; to opens the file. In Emacs the location of the temporary
+directory is set by the &lt;code&gt;temporary-file-directory&lt;/code&gt; variable. To open a file using a snap, I
+had to set the variable to something in my home directory. I thought about adding a new
+directory to the &lt;code&gt;.cache&lt;/code&gt;, but I soon discovered that &lt;code&gt;Firefox&lt;/code&gt; doesn&amp;#39;t have access to it
+either&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-1&#34; href=&#34;#footnote-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. So I settled for the rather inelegant solution of creating a temporary
+directory inside Downloads.&lt;/p&gt;
+&lt;div class=&#34;src src-emacs-lisp&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-emacs-lisp&#34; data-lang=&#34;emacs-lisp&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defvar&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-temp-email-dir&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;~/Downloads/tmp-mu/&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Location of temporary files for Emacs mu4e.&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-open-email-in-browser&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;kp&#34;&gt;&amp;amp;optional&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;skip-headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Show current MSG in browser if it includes an HTML-part.
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;This is a wrapper function for `mu4e-action-view-in-browser`
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;needed to get around snaps inability to access the temp
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;directory. If SKIP-HEADERS is set, do not show include message
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;headers. The variables &lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;`browse-url-browser-function&amp;#39;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;,
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;`browse-url-handlers&amp;#39;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;, and &lt;/span&gt;&lt;span class=&#34;ss&#34;&gt;`browse-url-default-handlers&amp;#39;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;determine which browser function to use.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;let*&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;temporary-file-directory&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-temp-email-dir&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;unless&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;file-directory-p&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;temporary-file-directory&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;make-directory&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;temporary-file-directory&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;mu4e-action-view-in-browser&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;skip-headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;setq&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;mu4e-view-actions&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;capture message&amp;#34;&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;mu4e-action-capture-message&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+                          &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;view in browser&amp;#34;&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-open-email-in-browser&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+                          &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;show this thread&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;mu4e-action-show-thread&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Having gone this far, I decided to go a bit further and create a function, which instead
+of opening the file, makes a &lt;code&gt;pdf&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-emacs-lisp&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-emacs-lisp&#34; data-lang=&#34;emacs-lisp&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-email-to-pdf&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;kp&#34;&gt;&amp;amp;optional&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;args&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Pdf temp file MSG to a new name with ARGS ignored.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;let*&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;async-shell-command-display-buffer&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;temp&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;format-time-string&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;~/Downloads/%Y-%m-%dT%H:%M.pdf&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;read-string&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;File name: &amp;#34;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;temp&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+         &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;html&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;replace-regexp-in-string&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;regexp-quote&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;file://&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;args&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;message&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Additional optional argument was ignored when saving to PDF.&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;async-shell-command&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;concat&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;pandoc &amp;#34;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;html&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34; -o &amp;#34;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-print-email-to-pdf&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;kp&#34;&gt;&amp;amp;optional&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;skip-headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Save current MSG as a pdf if it includes an HTML-part.
+&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;If SKIP-HEADERS is set, do not show include message headers.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;let*&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;browse-url-browser-function&lt;/span&gt;  &lt;span class=&#34;ss&#34;&gt;&amp;#39;extra-email-to-pdf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;mu4e-action-view-in-browser&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;skip-headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+And another function to save the &lt;code&gt;html&lt;/code&gt; part of the email.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;defun extra-move-temp-email-location &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;msg &lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;optional args&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s2&#34;&gt;&amp;#34;Move and rename temp file MSG to a new location with ARGS ignored.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;let* &lt;span class=&#34;o&#34;&gt;((&lt;/span&gt;temp &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;format-time-string &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;concat extra-temp-email-dir
+                                           &lt;span class=&#34;s2&#34;&gt;&amp;#34;%Y-%m-%dT%H:%M.html&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)))&lt;/span&gt;
+         &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;name &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;read-string &lt;span class=&#34;s2&#34;&gt;&amp;#34;File name: &amp;#34;&lt;/span&gt; temp&lt;span class=&#34;o&#34;&gt;))&lt;/span&gt;
+         &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;file &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;replace-regexp-in-string &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;regexp-quote &lt;span class=&#34;s2&#34;&gt;&amp;#34;file://&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; msg t t&lt;span class=&#34;o&#34;&gt;)))&lt;/span&gt;
+    &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; args &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;message &lt;span class=&#34;s2&#34;&gt;&amp;#34;Additional optional argument was ignored when saving to HTML.&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;))&lt;/span&gt;
+    &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;rename-file file name&lt;span class=&#34;o&#34;&gt;)))&lt;/span&gt;
+
+&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;defun extra-save-email-html &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;msg &lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;optional skip-headers&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s2&#34;&gt;&amp;#34;Save current MSG HTML-part.
+&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;If SKIP-HEADERS is set, do not show include message headers.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;let* &lt;span class=&#34;o&#34;&gt;((&lt;/span&gt;extra-temp-email-dir &lt;span class=&#34;s2&#34;&gt;&amp;#34;~/Downloads/&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+         &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;browse-url-browser-function  &lt;span class=&#34;s1&#34;&gt;&amp;#39;extra-move-temp-email-location))
+&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;    (mu4e-action-view-in-browser msg skip-headers)))
+&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;(setq mu4e-view-actions &amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;capture message&amp;#34;&lt;/span&gt;  . mu4e-action-capture-message&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+                          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;view in browser&amp;#34;&lt;/span&gt;  . extra-open-email-in-browser&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+                          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;download as html&amp;#34;&lt;/span&gt;  . extra-save-email-html&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+                          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;print to PDF&amp;#34;&lt;/span&gt;  . extra-print-email-to-pdf&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+                          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;show this thread&amp;#34;&lt;/span&gt; . mu4e-action-show-thread&lt;span class=&#34;o&#34;&gt;)))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+And another function to clean the temporary files.&lt;/p&gt;
+&lt;div class=&#34;src src-emacs-lisp&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-emacs-lisp&#34; data-lang=&#34;emacs-lisp&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-clean-temp-email-directory&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Remove all files from DIR if possible.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;when&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;file-directory-p&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-temp-email-dir&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;files&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;directory-files&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-temp-email-dir&lt;/span&gt;
+                                  &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt;
+                                  &lt;span class=&#34;nv&#34;&gt;directory-files-no-dot-files-regexp&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;dolist&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;file&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;files&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;condition-case&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;nil&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;delete-file&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+          &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ne&#34;&gt;error&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;condition-case&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;nil&lt;/span&gt;
+          &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;delete-directory&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;extra-temp-email-dir&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;ne&#34;&gt;error&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;add-hook&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;kill-emacs-hook&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;extra-clean-temp-email-directory&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+So now, after opening an email, I can call &lt;code&gt;mu4e-view-action&lt;/code&gt; and print the email or save
+it. And if all goes well, after closing Emacs, I won&amp;#39;t have a temporary folder in my
+Downloads directory.&lt;/p&gt;
+&lt;p&gt;
+Finally, to encourage the use to text over &lt;code&gt;html&lt;/code&gt; on emails, I added two more lines to my
+configuration.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;setq mm-discouraged-alternatives &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;list &lt;span class=&#34;s2&#34;&gt;&amp;#34;image/.*&amp;#34;&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;text/html&amp;#34;&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;text/richtext&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+      gnus-inhibit-images t&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr class=&#34;footnotes-separatator&#34;&gt;
+&lt;div class=&#34;footnote-definitions&#34;&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-1&#34;&gt;&lt;a href=&#34;#footnote-reference-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;I hope the benefits of Snaps offset the frustrating access rights, auto updates,
+and other myriad of tiny annoyances —in addition to the fact that &lt;code&gt;apt install&lt;/code&gt; sneakily
+contacts the snap store but makes you use &lt;code&gt;snap refresh&lt;/code&gt;, because you know, &lt;code&gt;apt&lt;/code&gt;, &lt;code&gt;apt-get&lt;/code&gt;,
+&lt;code&gt;cargo&lt;/code&gt;, and &lt;code&gt;pip&lt;/code&gt; are just not enough.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description>
+    </item>
+    
+    <item>
+      <title>Making ProtonVPN Usable on Linux</title>
+      <link>https://mrincon.net/posts/pvpn/</link>
+      <pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrincon.net/posts/pvpn/</guid>
+      <description>&lt;p&gt;
+ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
+unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
+unless the kill switch is deleted using &lt;code&gt;nmcli&lt;/code&gt;. And the command line application has a
+&lt;a href=&#34;https://github.com/ProtonVPN/linux-cli/issues/62&#34;&gt;bizarre dependency&lt;/a&gt; on &lt;code&gt;nm-applet&lt;/code&gt;, which of course means it cannot be used on a headless
+machine. Brilliant. And it &lt;a href=&#34;https://github.com/ProtonVPN/linux-app/issues/49&#34;&gt;appears&lt;/a&gt; that &lt;code&gt;ProtonVPN&lt;/code&gt; is not going to fix this. The solution
+is to use &lt;code&gt;ProtonVPN&lt;/code&gt; with &lt;code&gt;Wireguard&lt;/code&gt; —or better yet, find a provider that cares about Linux.&lt;/p&gt;
+&lt;p&gt;
+First, installed &lt;code&gt;Wireguard&lt;/code&gt;. Then, I logged into &lt;code&gt;ProtonVPN&lt;/code&gt;, and in the download section,
+made and downloaded a few &lt;code&gt;Wireguard&lt;/code&gt; configuration files. Once downloaded, I added the
+connections using &lt;code&gt;NetworkManager&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;nmcli con import &lt;span class=&#34;nb&#34;&gt;type&lt;/span&gt; wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+By default, all &lt;code&gt;wireguard&lt;/code&gt; connections will auto connect on start up. Since I only want one
+default connection, I changed that. In addition, I disabled &lt;code&gt;IPv6&lt;/code&gt; on all the connection.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# The first value will be set as default + autoconnect&lt;/span&gt;
+mapfile -t WG &amp;lt; &amp;lt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;nmcli con show &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep wireguard &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; cut -d&lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; -f1 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tr &lt;span class=&#34;s1&#34;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# No ipv6, auto connect to first only&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;AUTOCONNECT&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;yes
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; CONN in &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;WG&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+    nmcli con modify &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; ipv6.method &lt;span class=&#34;s2&#34;&gt;&amp;#34;disabled&amp;#34;&lt;/span&gt;
+    nmcli con mod &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; connection.autoconnect &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;AUTOCONNECT&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;AUTOCONNECT&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;no
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Autoconnect Settings:&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;
+nmcli -f name,autoconnect connection&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+I also wanted a &lt;code&gt;killswitch&lt;/code&gt;, so I used &lt;code&gt;ufw&lt;/code&gt; to configure one. First I disabled connections outside my &lt;code&gt;LAN&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span&gt;
+ip address &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep inet
+
+ufw reset
+ufw default deny outgoing
+ufw default deny incoming
+&lt;span class=&#34;c1&#34;&gt;# whitelist the range found with ip address&lt;/span&gt;
+ufw allow in to 192.168.1.0/24
+ufw allow out to 192.168.1.0/24&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Because I wanted to be able to reconnect without turning off the firewall, I also made
+exceptions for the &lt;code&gt;VPN&lt;/code&gt; connections.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;mapfile -t WG &amp;lt; &amp;lt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;nmcli con show &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep wireguard &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; cut -d&lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; -f1 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tr &lt;span class=&#34;s1&#34;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; CONN in &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;WG&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+   mapfile -t EP &amp;lt; &amp;lt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;grep endpoint &amp;lt;
+         /etc/NetworkManager/system-connections/&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;.nmconnection &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+         cut -d&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; -f2 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+         tr : &lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+   &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;[[&lt;/span&gt; -v EP&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;0&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;]]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;[[&lt;/span&gt; -v EP&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;]]&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;then&lt;/span&gt;
+       ufw allow out to &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;EP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[0]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; port &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;EP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[1]&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; proto udp
+       &lt;span class=&#34;c1&#34;&gt;# send everything on VPN tunnel (equivalent to tun0 for openVPN)&lt;/span&gt;
+       ufw allow out on &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; from any to any
+       &lt;span class=&#34;c1&#34;&gt;# Enable for bit torrent&lt;/span&gt;
+       &lt;span class=&#34;c1&#34;&gt;# ufw allow in on &amp;#34;${CONN}&amp;#34; from any to any&lt;/span&gt;
+   &lt;span class=&#34;k&#34;&gt;else&lt;/span&gt;
+       &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Unable to determine endpoint for &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;CONN&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &amp;gt;&lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;
+       &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Skipped&amp;#34;&lt;/span&gt; &amp;gt;&lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;
+       contninue
+   &lt;span class=&#34;k&#34;&gt;fi&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# Enable ufw if needed&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;{&lt;/span&gt; ufw status &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep inactive&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; ufw &lt;span class=&#34;nb&#34;&gt;enable&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Rules:&amp;#34;&lt;/span&gt;
+ufw status verbose&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+At this point there shouldn&amp;#39;t be any connection outside the &lt;code&gt;LAN&lt;/code&gt; unless I have a &lt;code&gt;VPN&lt;/code&gt;
+connections.&lt;/p&gt;
+&lt;div class=&#34;src src-sh&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# ping google should fail&lt;/span&gt;
+ping 8.8.8.8
+&lt;span class=&#34;c1&#34;&gt;# but work after vpn is activate&lt;/span&gt;
+nmcli --ask con up &amp;lt;vpn name&amp;gt;
+ping google
+&lt;span class=&#34;c1&#34;&gt;# we can also check for leaks&lt;/span&gt;
+curl https://ipleak.net/json/ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; bat -l json
+&lt;span class=&#34;c1&#34;&gt;# and in the DNS&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;session&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; mrfox &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; sha1sum&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; i in &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;seq &lt;span class=&#34;m&#34;&gt;5000&lt;/span&gt; 5003&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+   curl &lt;span class=&#34;s2&#34;&gt;&amp;#34;https://&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;session&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;40&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;.ipleak.net/dnsdetection/&amp;#34;&lt;/span&gt;
+   sleep &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+And that&amp;#39;s that. If I need to disable the &lt;code&gt;VPN&lt;/code&gt; I can easily do that, and things should work
+as long as I also disable the firewall.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Tracking Packages With Org-Mode</title>
-      <link>https://foxfriday.github.io/posts/org-tracking/</link>
+      <link>https://mrincon.net/posts/org-pacakges/</link>
       <pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate>
       
-      <guid>https://foxfriday.github.io/posts/org-tracking/</guid>
+      <guid>https://mrincon.net/posts/org-pacakges/</guid>
       <description>&lt;p&gt;
 December is the season to mail and receive packages. To keep track of them, I create a
 &lt;code&gt;TODO&lt;/code&gt; item for each package in an Emacs&amp;#39; org file. I make note of the mailing date, the
 content of the package, and the tracking number. The advantage of using Emacs is that a
-few line of code can make the tracking numbers clickable.&lt;/p&gt;</description>
+few line of code can make the tracking numbers clickable.&lt;/p&gt;
+&lt;div class=&#34;src src-emacs-lisp&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-emacs-lisp&#34; data-lang=&#34;emacs-lisp&#34;&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;org-link-track-ups&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Track a ups package where PATH is the tracking number.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;browse-url&lt;/span&gt;
+   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;url-encode-url&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;concat&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;https://www.ups.com/track?loc=en_US&amp;amp;tracknum=&amp;#34;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+   &lt;span class=&#34;nv&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;org-link-track-usps&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Track a usps package where PATH is the tracking number.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;browse-url&lt;/span&gt;
+   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;url-encode-url&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;concat&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;https://tools.usps.com/go/TrackConfirmAction.action?tLabels=&amp;#34;&lt;/span&gt;
+            &lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+   &lt;span class=&#34;nv&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;org-link-track-fedex&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;s&#34;&gt;&amp;#34;Track a fedex package where PATH is the tracking number.&amp;#34;&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;browse-url&lt;/span&gt;
+   &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;url-encode-url&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;concat&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;https://www.fedex.com/fedextrack/?trknbr=&amp;#34;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;path&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+   &lt;span class=&#34;nv&#34;&gt;arg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;org-link-set-parameters&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;ups&amp;#34;&lt;/span&gt;
+                         &lt;span class=&#34;nb&#34;&gt;:follow&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;org-link-track-ups&lt;/span&gt;
+                         &lt;span class=&#34;nb&#34;&gt;:face&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;:foreground&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;green&amp;#34;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;:underline&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;org-link-set-parameters&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;usps&amp;#34;&lt;/span&gt;
+                         &lt;span class=&#34;nb&#34;&gt;:follow&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;org-link-track-usps&lt;/span&gt;
+                         &lt;span class=&#34;nb&#34;&gt;:face&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;:foreground&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;green&amp;#34;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;:underline&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;org-link-set-parameters&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;fedex&amp;#34;&lt;/span&gt;
+                         &lt;span class=&#34;nb&#34;&gt;:follow&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;&amp;#39;org-link-track-fedex&lt;/span&gt;
+                         &lt;span class=&#34;nb&#34;&gt;:face&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;:foreground&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;green&amp;#34;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;:underline&lt;/span&gt; &lt;span class=&#34;no&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Then, I can just type &lt;code&gt;[[ups:&amp;lt;tracking number]]&lt;/code&gt; in an org file and &lt;code&gt;open-at-point&lt;/code&gt;
+lets me know where is my package.&lt;/p&gt;</description>
     </item>
     
   </channel>
