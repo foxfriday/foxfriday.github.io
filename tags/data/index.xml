@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>data on M. Rincón</title><link>https://mrincon.net/tags/data/</link><description>Recent content in data on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Fri, 28 Jul 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/data/index.xml" rel="self" type="application/rss+xml"/><item><title>Working with biggish data files</title><link>https://mrincon.net/posts/csv/</link><pubDate>Fri, 28 Jul 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/csv/</guid><description>&lt;p>
+Last week I worked with over 10,000 files of tabular data, each with about 50,000 rows and
+10 columns separated by a &amp;#39;|&amp;#39;. This is the kind of problem that falls on the uncanny
+valley between small and biggish data. My goal was to make some quick checks and, if
+possible, concatenate the files into a single &lt;code>csv&lt;/code> file I could load into Python.&lt;/p>
+&lt;p>
+The first step was to make sure that the number and order of the columns was the same
+for all files:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">head -q -n &lt;span class="m">1&lt;/span> *.dat &lt;span class="p">|&lt;/span> sort &lt;span class="p">|&lt;/span> uniq&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+While the revealed that not all headers were the same, the differences were insignificant.
+For example, some files used &amp;#34;NET_CHANGE&amp;#34; while other used &amp;#34;NET CHANGE&amp;#34;. One file seemed
+to quote the first line. Other files were terminated with carriage return and new line
+pairs. But worryingly, some files seemed to start with an empty line. I didn&amp;#39;t know if
+these files were empty, or if they have a different format. I made a list of the files,
+and opened a sample:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">head -n &lt;span class="m">1&lt;/span> -v *.dat &lt;span class="p">|&lt;/span> grep -B1 -E &lt;span class="s1">$&amp;#39;^\r$&amp;#39;&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+It turned out that these files had an extra empty line terminated by a carriage return on
+the first line. Lucky. I removed the carriage returns and the empty lines and all the files:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">sed -i &lt;span class="s1">$&amp;#39;s/\r//&amp;#39;&lt;/span> *.dat &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sed -i &lt;span class="s1">&amp;#39;/^[[:blank:]]*$/ d&amp;#39;&lt;/span> *.dat&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+Now all the headers appeared to be about the same. At this point I shouldn&amp;#39;t have any empty lines. Still, I took a second look:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">grep -E &lt;span class="s1">$&amp;#39;^$&amp;#39;&lt;/span> *.dat&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+At this point I notice that some file sizes were only big enough to hold a header line.
+Looking at their tails proved my suspicion correct. I deleted them using vim:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">:r !du -ckhs * &lt;span class="p">|&lt;/span> grep &lt;span class="s2">&amp;#34;^4\.0K&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">:%s/^4.*&lt;span class="se">\t&lt;/span>/rm
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">:w !sh&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+At this point I went ahead and concatenated the files. Since I only wanted to preserve
+one header, I used &lt;code>awk&lt;/code>.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">head -n1 2023_04_27.dat &amp;gt; all.txt
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">awk FNR!&lt;span class="o">=&lt;/span>&lt;span class="m">1&lt;/span> *.dat &amp;gt;&amp;gt; all.txt
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">du -h all.txt
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">wc -l all.txt&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+The result was one file with a little under six hundred million lines. Because I wanted a
+&lt;code>csv&lt;/code> file, I removed any existing commas, and changed the separator from &amp;#39;|&amp;#39; to &amp;#39;,&amp;#39;:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">sed -i &lt;span class="s1">&amp;#39;s/,//g&amp;#39;&lt;/span> all.txt &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sed -i &lt;span class="s1">&amp;#39;s/|/,/g&amp;#39;&lt;/span> all.txt&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+I also checked that the resulting file wasn&amp;#39;t jagged, and it wasn&amp;#39;t:&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">cat input.csv &lt;span class="p">|&lt;/span> grep -v &lt;span class="s2">&amp;#34;^#&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> awk &lt;span class="s2">&amp;#34;{print NF}&amp;#34;&lt;/span> &lt;span class="nv">FS&lt;/span>&lt;span class="o">=&lt;/span>, &lt;span class="p">|&lt;/span> uniq&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+At this point I could have fired &lt;code>Dask&lt;/code>, but I thought I could do better and reduce the file
+to something &lt;code>Polars&lt;/code> could handle. After taking a look at the original files, I suspected
+some redundancy. For example, one column showed the three character product code, another
+had the numerical code, and another a product description. This suggested I could use one
+of the codes as a key I could use to map to a second file with the numerical code and
+description. Using &lt;code>shuf&lt;/code> I made a sample, split it, and recovered the original file using
+&lt;code>join&lt;/code> and &lt;code>diff&lt;/code>. Nice. The file could be divided, and doing that reduced the size of the
+data be over 60% without loosing any information.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">cut -d&lt;span class="s1">&amp;#39;,&amp;#39;&lt;/span> -f1,4-7,8 all.txt &amp;gt; px.csv
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">cut -d&lt;span class="s1">&amp;#39;,&amp;#39;&lt;/span> -f2-3,5-6,11 all.txt &lt;span class="p">|&lt;/span> sort &lt;span class="p">|&lt;/span> uniq &amp;gt; description.csv&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;p>
+Now the final file was small enough for me to inspect locally with &lt;code>polars&lt;/code>.&lt;/p></description></item></channel></rss>
