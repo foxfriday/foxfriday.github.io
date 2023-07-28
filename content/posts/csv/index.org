@@ -1,0 +1,90 @@
+#+title: Working with biggish data files
+#+date: 2023-07-28
+#+draft: false
+#+tags[]: linux data
+
+Last week I worked with over 10,000 files of tabular data, each with about 50,000 rows and
+10 columns separated by a '|'. This is the kind of problem that falls on the uncanny
+valley between small and biggish data. My goal was to make some quick checks and, if
+possible, concatenate the files into a single ~csv~ file I could load into Python.
+
+# more
+
+The first step was to make sure that the number and order of the columns was the same
+for all files:
+
+#+begin_src sh
+head -q -n 1 *.dat | sort | uniq
+#+end_src
+
+While the revealed that not all headers were the same, the differences were insignificant.
+For example, some files used "NET_CHANGE" while other used "NET CHANGE". One file seemed
+to quote the first line. Other files were terminated with carriage return and new line
+pairs. But worryingly, some files seemed to start with an empty line. I didn't know if
+these files were empty, or if they have a different format. I made a list of the files,
+and opened a sample:
+
+#+begin_src sh
+head -n 1 -v *.dat | grep -B1 -E $'^\r$'
+#+end_src
+
+It turned out that these files had an extra empty line terminated by a carriage return on
+the first line. Lucky. I removed the carriage returns and the empty lines and all the files:
+
+#+begin_src sh
+sed -i $'s/\r//' *.dat && sed -i '/^[[:blank:]]*$/ d' *.dat
+#+end_src
+
+Now all the headers appeared to be about the same. At this point I shouldn't have any empty lines. Still, I took a second look:
+
+#+begin_src sh
+grep -E $'^$' *.dat
+#+end_src
+
+At this point I notice that some file sizes were only big enough to hold a header line.
+Looking at their tails proved my suspicion correct. I deleted them using vim:
+
+#+begin_src sh
+:r !du -ckhs * | grep "^4\.0K"
+:%s/^4.*\t/rm
+:w !sh
+#+end_src
+
+At this point I went ahead and concatenated the files. Since I only wanted to preserve
+one header, I used ~awk~.
+
+#+begin_src sh
+head -n1 2023_04_27.dat > all.txt
+awk FNR!=1 *.dat >> all.txt
+du -h all.txt
+wc -l all.txt
+#+end_src
+
+The result was one file with a little under six hundred million lines. Because I wanted a
+~csv~ file, I removed any existing commas, and changed the separator from '|' to ',':
+
+#+begin_src sh
+sed -i 's/,//g' all.txt && sed -i 's/|/,/g' all.txt
+#+end_src
+
+I also checked that the resulting file wasn't jagged, and it wasn't:
+
+#+begin_src sh
+cat input.csv | grep -v "^#" | awk "{print NF}" FS=, | uniq
+#+end_src
+
+At this point I could have fired ~Dask~, but I thought I could do better and reduce the file
+to something ~Polars~ could handle. After taking a look at the original files, I suspected
+some redundancy. For example, one column showed the three character product code, another
+had the numerical code, and another a product description. This suggested I could use one
+of the codes as a key I could use to map to a second file with the numerical code and
+description. Using ~shuf~ I made a sample, split it, and recovered the original file using
+~join~ and ~diff~. Nice. The file could be divided, and doing that reduced the size of the
+data be over 60% without loosing any information.
+
+#+begin_src sh
+cut -d',' -f1,4-7,8 all.txt > px.csv
+cut -d',' -f2-3,5-6,11 all.txt | sort | uniq > description.csv
+#+end_src
+
+Now the final file was small enough for me to inspect locally with ~polars~.
