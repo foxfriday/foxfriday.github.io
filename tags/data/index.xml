@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>data on M. Rincón</title><link>https://mrincon.net/tags/data/</link><description>Recent content in data on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Fri, 28 Jul 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/data/index.xml" rel="self" type="application/rss+xml"/><item><title>Working with biggish data files</title><link>https://mrincon.net/posts/csv/</link><pubDate>Fri, 28 Jul 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/csv/</guid><description>&lt;p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Data on M. Rincón</title><link>https://mrincon.net/tags/data/</link><description>Recent content in Data on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Fri, 28 Jul 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/tags/data/index.xml" rel="self" type="application/rss+xml"/><item><title>Working with biggish data files</title><link>https://mrincon.net/posts/csv/</link><pubDate>Fri, 28 Jul 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/csv/</guid><description>&lt;p>
 Last week I worked with over 10,000 files of tabular data, each with about 50,000 rows and
-10 columns separated by a &amp;#39;|&amp;#39;. This is the kind of problem that falls on the uncanny
+10 columns separated by a &amp;#39;|&amp;#39;. This is the kind of problem that falls in the uncanny
 valley between small and biggish data. My goal was to make some quick checks and, if
 possible, concatenate the files into a single &lt;code>csv&lt;/code> file I could load into Python.&lt;/p>
 &lt;p>
@@ -26,12 +26,13 @@ the first line. Lucky. I removed the carriage returns and the empty lines and al
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">sed -i &lt;span class="s1">$&amp;#39;s/\r//&amp;#39;&lt;/span> *.dat &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sed -i &lt;span class="s1">&amp;#39;/^[[:blank:]]*$/ d&amp;#39;&lt;/span> *.dat&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
-Now all the headers appeared to be about the same. At this point I shouldn&amp;#39;t have any empty lines. Still, I took a second look:&lt;/p>
+Now all the headers appeared to be about the same, and I shouldn&amp;#39;t have any empty lines.
+Still, I took a second look:&lt;/p>
 &lt;div class="src src-sh">
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">grep -E &lt;span class="s1">$&amp;#39;^$&amp;#39;&lt;/span> *.dat&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
-At this point I notice that some file sizes were only big enough to hold a header line.
+At this point I noticed that some file sizes were only big enough to hold a header line.
 Looking at their tails proved my suspicion correct. I deleted them using vim:&lt;/p>
 &lt;div class="src src-sh">
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">:r !du -ckhs * &lt;span class="p">|&lt;/span> grep &lt;span class="s2">&amp;#34;^4\.0K&amp;#34;&lt;/span>

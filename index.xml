@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>M. Rincón</title><link>https://mrincon.net/</link><description>Recent content on M. Rincón</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>M. Rincón</copyright><lastBuildDate>Fri, 28 Jul 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://mrincon.net/index.xml" rel="self" type="application/rss+xml"/><item><title>Working with biggish data files</title><link>https://mrincon.net/posts/csv/</link><pubDate>Fri, 28 Jul 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/csv/</guid><description>&lt;p>
 Last week I worked with over 10,000 files of tabular data, each with about 50,000 rows and
-10 columns separated by a &amp;#39;|&amp;#39;. This is the kind of problem that falls on the uncanny
+10 columns separated by a &amp;#39;|&amp;#39;. This is the kind of problem that falls in the uncanny
 valley between small and biggish data. My goal was to make some quick checks and, if
 possible, concatenate the files into a single &lt;code>csv&lt;/code> file I could load into Python.&lt;/p>
 &lt;p>
@@ -26,12 +26,13 @@ the first line. Lucky. I removed the carriage returns and the empty lines and al
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">sed -i &lt;span class="s1">$&amp;#39;s/\r//&amp;#39;&lt;/span> *.dat &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> sed -i &lt;span class="s1">&amp;#39;/^[[:blank:]]*$/ d&amp;#39;&lt;/span> *.dat&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
-Now all the headers appeared to be about the same. At this point I shouldn&amp;#39;t have any empty lines. Still, I took a second look:&lt;/p>
+Now all the headers appeared to be about the same, and I shouldn&amp;#39;t have any empty lines.
+Still, I took a second look:&lt;/p>
 &lt;div class="src src-sh">
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">grep -E &lt;span class="s1">$&amp;#39;^$&amp;#39;&lt;/span> *.dat&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
-At this point I notice that some file sizes were only big enough to hold a header line.
+At this point I noticed that some file sizes were only big enough to hold a header line.
 Looking at their tails proved my suspicion correct. I deleted them using vim:&lt;/p>
 &lt;div class="src src-sh">
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">:r !du -ckhs * &lt;span class="p">|&lt;/span> grep &lt;span class="s2">&amp;#34;^4\.0K&amp;#34;&lt;/span>
@@ -217,39 +218,29 @@ contacts the snap store but makes you use &lt;code>snap refresh&lt;/code>, becau
 &lt;/div>
 &lt;/div></description></item><item><title>Making ProtonVPN Usable on Linux</title><link>https://mrincon.net/posts/pvpn/</link><pubDate>Tue, 21 Feb 2023 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/pvpn/</guid><description>&lt;p>
 ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
-unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
-unless the kill switch is deleted using &lt;code>nmcli&lt;/code>. And the command line application has a
-&lt;a href="https://github.com/ProtonVPN/linux-cli/issues/62">bizarre dependency&lt;/a> on &lt;code>nm-applet&lt;/code>, which of course means it cannot be used on a headless
-machine. Brilliant. And it &lt;a href="https://github.com/ProtonVPN/linux-app/issues/49">appears&lt;/a> that &lt;code>ProtonVPN&lt;/code> is not going to fix this. The solution
-is to use &lt;code>ProtonVPN&lt;/code> with &lt;code>Wireguard&lt;/code> —or better yet, find a provider that cares about Linux.&lt;/p>
+unusable. It consumes up to 2 GB of memory idled, drops connections, and fails to
+reconnect unless the kill switch is deleted using &lt;code>nmcli&lt;/code>. The command line application has
+a &lt;a href="https://github.com/ProtonVPN/linux-cli/issues/62">bizarre dependency&lt;/a> on &lt;code>nm-applet&lt;/code>, which of course means it cannot be used on a headless
+machine. It &lt;a href="https://github.com/ProtonVPN/linux-app/issues/49">appears&lt;/a> that &lt;code>ProtonVPN&lt;/code> is not going to fix this. The solution is to use
+&lt;code>ProtonVPN&lt;/code> with &lt;code>Wireguard&lt;/code>.&lt;/p>
 &lt;p>
-First, installed &lt;code>Wireguard&lt;/code>. Then, I logged into &lt;code>ProtonVPN&lt;/code>, and in the download section,
-made and downloaded a few &lt;code>Wireguard&lt;/code> configuration files. Once downloaded, I added the
-connections using &lt;code>NetworkManager&lt;/code>.&lt;/p>
+First, install &lt;code>Wireguard&lt;/code> and &lt;code>ufw&lt;/code>. Then, log into &lt;code>ProtonVPN&lt;/code>, and in the download section,
+get a few &lt;code>Wireguard&lt;/code> configuration files. Add them to the &lt;code>NetworkManager&lt;/code>. By default, all
+new &lt;code>wireguard&lt;/code> connections will auto connect on start up. Since I only want one default
+connection, I modified all but one. In addition, I disabled &lt;code>IPv6&lt;/code> on all the connection.&lt;/p>
 &lt;div class="src src-sh">
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli con import &lt;span class="nb">type&lt;/span> wireguard file &amp;lt;filename.ovpn&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
-&lt;/div>
-&lt;p>
-By default, all &lt;code>wireguard&lt;/code> connections will auto connect on start up. Since I only want one
-default connection, I changed that. In addition, I disabled &lt;code>IPv6&lt;/code> on all the connection.&lt;/p>
-&lt;div class="src src-sh">
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The first value will be set as default + autoconnect&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># No ipv6, auto connect to first only&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="o">=&lt;/span>yes
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> CONN in &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">WG&lt;/span>&lt;span class="p">[@]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">do&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> nmcli con modify &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> ipv6.method &lt;span class="s2">&amp;#34;disabled&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> nmcli con mod &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> connection.autoconnect &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">AUTOCONNECT&lt;/span>&lt;span class="o">=&lt;/span>no
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Autoconnect Settings:&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">nmcli con import &lt;span class="nb">type&lt;/span> wireguard file &amp;lt;connection.conf&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli con modify &amp;lt;connection&amp;gt; ipv6.method &lt;span class="s2">&amp;#34;ignore&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># if not the default connection:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli con mod &amp;lt;connection&amp;gt; connection.autoconnect no
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli con down &amp;lt;connection&amp;gt;
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli -f name,autoconnect connection&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
-I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> to configure one. First I disabled connections outside my &lt;code>LAN&lt;/code>.&lt;/p>
+I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> to configure one (Fedora comes with &lt;code>FirewallD&lt;/code>,
+but I&amp;#39;m familiar with &lt;code>ufw&lt;/code>). First I disabled connections outside my &lt;code>LAN&lt;/code>. Because I want to
+be able to reconnect without turning off the firewall, I made exceptions for the &lt;code>VPN&lt;/code>
+connections by allowing paths to the end points in the configuration files.&lt;/p>
 &lt;div class="src src-sh">
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ignore the 127.0.0.1/8 range, that&amp;#39;s the loop back&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ip address &lt;span class="p">|&lt;/span> grep inet
@@ -258,37 +249,11 @@ I also wanted a &lt;code>killswitch&lt;/code>, so I used &lt;code>ufw&lt;/code> 
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw default deny outgoing
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw default deny incoming
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># whitelist the range found with ip address&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow in to 192.168.1.0/24
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to 192.168.1.0/24&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
-&lt;/div>
-&lt;p>
-Because I wanted to be able to reconnect without turning off the firewall, I also made
-exceptions for the &lt;code>VPN&lt;/code> connections.&lt;/p>
-&lt;div class="src src-sh">
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">mapfile -t WG &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>nmcli con show &lt;span class="p">|&lt;/span> grep wireguard &lt;span class="p">|&lt;/span> cut -d&lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> -f1 &lt;span class="p">|&lt;/span> tr &lt;span class="s1">&amp;#39;\n&amp;#39;&lt;/span> &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span> &lt;span class="o">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> CONN in &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">WG&lt;/span>&lt;span class="p">[@]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">do&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> mapfile -t EP &amp;lt; &amp;lt;&lt;span class="o">(&lt;/span>grep endpoint &amp;lt;
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> /etc/NetworkManager/system-connections/&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>.nmconnection &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> cut -d&lt;span class="o">=&lt;/span> -f2 &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> tr : &lt;span class="s1">&amp;#39; &amp;#39;&lt;/span>&lt;span class="o">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="o">[[&lt;/span> -v EP&lt;span class="o">[&lt;/span>0&lt;span class="o">]&lt;/span> &lt;span class="o">]]&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="o">[[&lt;/span> -v EP&lt;span class="o">[&lt;/span>1&lt;span class="o">]&lt;/span> &lt;span class="o">]]&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="k">then&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ufw allow out to &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">EP&lt;/span>&lt;span class="p">[0]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> port &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">EP&lt;/span>&lt;span class="p">[1]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> proto udp
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># send everything on VPN tunnel (equivalent to tun0 for openVPN)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ufw allow out on &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> from any to any
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Enable for bit torrent&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># ufw allow in on &amp;#34;${CONN}&amp;#34; from any to any&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">else&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Unable to determine endpoint for &lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">CONN&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &amp;gt;&lt;span class="p">&amp;amp;&lt;/span>&lt;span class="m">2&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Skipped&amp;#34;&lt;/span> &amp;gt;&lt;span class="p">&amp;amp;&lt;/span>&lt;span class="m">2&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> contninue
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">fi&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Enable ufw if needed&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">{&lt;/span> ufw status &lt;span class="p">|&lt;/span> grep inactive&lt;span class="p">;&lt;/span> &lt;span class="o">}&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> ufw &lt;span class="nb">enable&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;Rules:&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw status verbose&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow in to &amp;lt;range start/end&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to&amp;lt;range start/end&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out to &amp;lt;ip&amp;gt; port &amp;lt;port number&amp;gt; proto udp
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw allow out on &amp;lt;connection&amp;gt; from any to any
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw enable&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
 At this point there shouldn&amp;#39;t be any connection outside the &lt;code>LAN&lt;/code> unless I have a &lt;code>VPN&lt;/code>
@@ -300,7 +265,7 @@ connections.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmcli --ask con up &amp;lt;vpn name&amp;gt;
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ping google
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># we can also check for leaks&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">curl https://ipleak.net/json/ &lt;span class="p">|&lt;/span> bat -l json
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">curl https://ipleak.net/json/ &lt;span class="p">|&lt;/span> jq
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># and in the DNS&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">session&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="k">$(&lt;/span>&lt;span class="nb">echo&lt;/span> mrfox &lt;span class="p">|&lt;/span> sha1sum&lt;span class="k">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> i in &lt;span class="k">$(&lt;/span>seq &lt;span class="m">5000&lt;/span> 5003&lt;span class="k">)&lt;/span>&lt;span class="p">;&lt;/span>
@@ -310,8 +275,15 @@ connections.&lt;/p>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">done&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;/div>
 &lt;p>
-And that&amp;#39;s that. If I need to disable the &lt;code>VPN&lt;/code> I can easily do that, and things should work
-as long as I also disable the firewall.&lt;/p></description></item><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-pacakges/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-pacakges/</guid><description>&lt;p>
+If all works as expected, &lt;code>ufw&lt;/code> can be set as a service.&lt;/p>
+&lt;div class="src src-sh">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># If active, disable firewalld&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl disable --now firewalld.service
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl &lt;span class="nb">enable&lt;/span> --now ufw.service
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ufw status
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># To see what was blocked&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">journalctl -t kernel -fag &lt;span class="s2">&amp;#34;UFW BLOCK&amp;#34;&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div></description></item><item><title>Tracking Packages With Org-Mode</title><link>https://mrincon.net/posts/org-pacakges/</link><pubDate>Tue, 06 Dec 2022 00:00:00 +0000</pubDate><guid>https://mrincon.net/posts/org-pacakges/</guid><description>&lt;p>
 December is the season to mail and receive packages. To keep track of them, I create a
 &lt;code>TODO&lt;/code> item for each package in an Emacs&amp;#39; org file. I make note of the mailing date, the
 content of the package, and the tracking number. The advantage of using Emacs is that a
