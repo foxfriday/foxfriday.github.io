@@ -4,7 +4,7 @@
 #+tags[]: linux data
 
 Last week I worked with over 10,000 files of tabular data, each with about 50,000 rows and
-10 columns separated by a '|'. This is the kind of problem that falls on the uncanny
+10 columns separated by a '|'. This is the kind of problem that falls in the uncanny
 valley between small and biggish data. My goal was to make some quick checks and, if
 possible, concatenate the files into a single ~csv~ file I could load into Python.
 
@@ -35,13 +35,14 @@ the first line. Lucky. I removed the carriage returns and the empty lines and al
 sed -i $'s/\r//' *.dat && sed -i '/^[[:blank:]]*$/ d' *.dat
 #+end_src
 
-Now all the headers appeared to be about the same. At this point I shouldn't have any empty lines. Still, I took a second look:
+Now all the headers appeared to be about the same, and I shouldn't have any empty lines.
+Still, I took a second look:
 
 #+begin_src sh
 grep -E $'^$' *.dat
 #+end_src
 
-At this point I notice that some file sizes were only big enough to hold a header line.
+At this point I noticed that some file sizes were only big enough to hold a header line.
 Looking at their tails proved my suspicion correct. I deleted them using vim:
 
 #+begin_src sh

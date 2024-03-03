@@ -1,48 +1,38 @@
 #+title: Making ProtonVPN Usable on Linux
 #+date: 2023-02-21
+#+lastmod: 2024-03-02
 #+draft: false
 #+tags[]: linux
 
 ProtonVPN provides a GUI and a console application for Linux, but on 2023, it is nearly
-unusable. It consumes up to 2GB of memory idled, drops connections and fails to reconnect
-unless the kill switch is deleted using ~nmcli~. And the command line application has a
-[[https://github.com/ProtonVPN/linux-cli/issues/62][bizarre dependency]] on ~nm-applet~, which of course means it cannot be used on a headless
-machine. Brilliant. And it [[https://github.com/ProtonVPN/linux-app/issues/49][appears]] that ~ProtonVPN~ is not going to fix this. The solution
-is to use ~ProtonVPN~ with ~Wireguard~ —or better yet, find a provider that cares about Linux.
+unusable. It consumes up to 2 GB of memory idled, drops connections, and fails to
+reconnect unless the kill switch is deleted using ~nmcli~. The command line application has
+a [[https://github.com/ProtonVPN/linux-cli/issues/62][bizarre dependency]] on ~nm-applet~, which of course means it cannot be used on a headless
+machine. It [[https://github.com/ProtonVPN/linux-app/issues/49][appears]] that ~ProtonVPN~ is not going to fix this. The solution is to use
+~ProtonVPN~ with ~Wireguard~.
 
 # more
 
-First, installed ~Wireguard~. Then, I logged into ~ProtonVPN~, and in the download section,
-made and downloaded a few ~Wireguard~ configuration files. Once downloaded, I added the
-connections using ~NetworkManager~.
+First, install ~Wireguard~ and ~ufw~. Then, log into ~ProtonVPN~, and in the download section,
+get a few ~Wireguard~ configuration files. Add them to the ~NetworkManager~. By default, all
+new ~wireguard~ connections will auto connect on start up. Since I only want one default
+connection, I modified all but one. In addition, I disabled ~IPv6~ on all the connection.
 
-#+begin_src sh :session sh :async
-nmcli con import type wireguard file <filename.ovpn>
-#+end_src
-
-By default, all ~wireguard~ connections will auto connect on start up. Since I only want one
-default connection, I changed that. In addition, I disabled ~IPv6~ on all the connection.
-
-#+begin_src sh :session sh :async
-# The first value will be set as default + autoconnect
-mapfile -t WG < <(nmcli con show | grep wireguard | cut -d' ' -f1 | tr '\n' ' ' )
-
-# No ipv6, auto connect to first only
-AUTOCONNECT=yes
-for CONN in "${WG[@]}"; do
-    nmcli con modify "${CONN}" ipv6.method "disabled"
-    nmcli con mod "${CONN}" connection.autoconnect "${AUTOCONNECT}"
-    AUTOCONNECT=no
-done
-
-echo "Autoconnect Settings:"
-echo ""
+#+begin_src sh
+nmcli con import type wireguard file <connection.conf>
+nmcli con modify <connection> ipv6.method "ignore"
+# if not the default connection:
+nmcli con mod <connection> connection.autoconnect no
+nmcli con down <connection>
 nmcli -f name,autoconnect connection
 #+end_src
 
-I also wanted a ~killswitch~, so I used ~ufw~ to configure one. First I disabled connections outside my ~LAN~.
+I also wanted a ~killswitch~, so I used ~ufw~ to configure one (Fedora comes with ~FirewallD~,
+but I'm familiar with ~ufw~). First I disabled connections outside my ~LAN~. Because I want to
+be able to reconnect without turning off the firewall, I made exceptions for the ~VPN~
+connections by allowing paths to the end points in the configuration files.
 
-#+begin_src sh :session sh :async
+#+begin_src sh
 # ignore the 127.0.0.1/8 range, that's the loop back
 ip address | grep inet
 
@@ -50,51 +40,24 @@ ufw reset
 ufw default deny outgoing
 ufw default deny incoming
 # whitelist the range found with ip address
-ufw allow in to 192.168.1.0/24
-ufw allow out to 192.168.1.0/24
-#+end_src
-
-Because I wanted to be able to reconnect without turning off the firewall, I also made
-exceptions for the ~VPN~ connections.
-
-#+begin_src sh :session sh :async
-mapfile -t WG < <(nmcli con show | grep wireguard | cut -d' ' -f1 | tr '\n' ' ' )
-
-for CONN in "${WG[@]}"; do
-   mapfile -t EP < <(grep endpoint <
-         /etc/NetworkManager/system-connections/"${CONN}".nmconnection |
-         cut -d= -f2 |
-         tr : ' ')
-   if [[ -v EP[0] ]] && [[ -v EP[1] ]]; then
-       ufw allow out to "${EP[0]}" port "${EP[1]}" proto udp
-       # send everything on VPN tunnel (equivalent to tun0 for openVPN)
-       ufw allow out on "${CONN}" from any to any
-       # Enable for bit torrent
-       # ufw allow in on "${CONN}" from any to any
-   else
-       echo "Unable to determine endpoint for ${CONN}" >&2
-       echo "Skipped" >&2
-       contninue
-   fi
-done
-
-# Enable ufw if needed
-{ ufw status | grep inactive; } && ufw enable
-echo "Rules:"
-ufw status verbose
+ufw allow in to <range start/end>
+ufw allow out to<range start/end>
+ufw allow out to <ip> port <port number> proto udp
+ufw allow out on <connection> from any to any
+ufw enable
 #+end_src
 
 At this point there shouldn't be any connection outside the ~LAN~ unless I have a ~VPN~
 connections.
 
-#+begin_src sh :session sh :async
+#+begin_src sh
 # ping google should fail
 ping 8.8.8.8
 # but work after vpn is activate
 nmcli --ask con up <vpn name>
 ping google
 # we can also check for leaks
-curl https://ipleak.net/json/ | bat -l json
+curl https://ipleak.net/json/ | jq
 # and in the DNS
 session=$(echo mrfox | sha1sum)
 for i in $(seq 5000 5003);
@@ -104,5 +67,13 @@ do
 done
 #+end_src
 
-And that's that. If I need to disable the ~VPN~ I can easily do that, and things should work
-as long as I also disable the firewall.
+If all works as expected, ~ufw~ can be set as a service.
+
+#+begin_src sh
+# If active, disable firewalld
+systemctl disable --now firewalld.service
+systemctl enable --now ufw.service
+ufw status
+# To see what was blocked
+journalctl -t kernel -fag "UFW BLOCK"
+#+end_src
