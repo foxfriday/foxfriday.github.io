@@ -1,0 +1,145 @@
+#+title: Eat Evil
+#+date: 2024-03-27
+#+draft: false
+#+tags[]: emacs
+
+[[https://codeberg.org/akib/emacs-eat][Eat]] is a terminal emulator for Emacs available in ~NonGNU ELpa~. Eat is much slower than
+foot, but faster than ~term.el~. It has some nice features like ~sixel~ support, and being
+able to send messages to Emacs. It also has some surprising idiosyncrasies which makes
+adding Evil key bindings and other modifications challenging.
+
+# more
+
+I think that the default state, semi char mode, captures too many key combinations. This
+can be changed by modifying ~eat-semi-char-non-bound-keys~ and reloading eat. But doing that
+inside a ~whith-eval-after-load~ block creates an infinite loop. To prevent the loop, the
+reloading should be done inside a ~let~ block:
+
+#+begin_src emacs-lisp :tangle yes
+(with-eval-after-load 'eat
+  (setq eat-semi-char-non-bound-keys (list [?\C-\\]
+                                           [?\C-w]
+                                           [?\C-h]
+                                           [?\C-x]
+                                           [?\e ?x]))
+  (eat-update-semi-char-mode-map)
+  (let ((after-load-alist nil)
+        (after-load-functions nil))
+    (eat-reload)))
+#+end_src
+
+Though eat doesn't work well with Evil, eat is a modal terminal emulator. And these modes
+can be leveraged to make it a bit more evil. This requires starting eat with a new
+function, ~my-eat-start~:
+
+#+begin_src emacs-lisp :tangle yes
+(defun my-eat-end ()
+  "Kill and close the eat buffer."
+  (interactive)
+  (eat-kill-process)
+  (kill-this-buffer))
+
+(defun my-eat-emacs-mode ()
+  "Help create a normal state with `eat-emacs-mode`."
+  (interactive)
+  (eat-emacs-mode)
+  (evil-define-key* 'normal eat-mode-map (kbd "[[") 'eat-previous-shell-prompt)
+  (evil-define-key* 'normal eat-mode-map (kbd "]]") 'eat-next-shell-prompt)
+  (evil-define-key* 'normal eat-mode-map (kbd "i") 'my-eat-semi-char-mode)
+  (evil-define-key* 'normal eat-mode-map (kbd "gO") 'browse-url)
+  (evil-define-key* 'normal eat-mode-map (kbd "q") 'my-eat-end)
+  (evil-normal-state))
+
+(defun my-eat-semi-char-mode ()
+  "Create bindings for `eat-mode` and switch to Emacs state."
+  (interactive)
+  (eat-semi-char-mode)
+  (keymap-set eat-mode-map "C-w h" 'evil-window-left)
+  (keymap-set eat-mode-map "C-w l" 'evil-window-right)
+  (keymap-set eat-mode-map "C-w k" 'evil-window-up)
+  (keymap-set eat-mode-map "C-w j" 'evil-window-down)
+  (keymap-set eat-mode-map "C-w +" 'evil-window-increase-height)
+  (keymap-set eat-mode-map "C-w -" 'evil-window-decrease-height)
+  (keymap-set eat-mode-map "C-w <" 'evil-window-decrease-width)
+  (keymap-set eat-mode-map "C-w >" 'evil-window-increase-width)
+  (keymap-set eat-mode-map "C-w =" 'balance-windows)
+  (keymap-set eat-mode-map "C-w R" 'evil-window-rotate-upwards)
+  (keymap-set eat-mode-map "C-w r" 'evil-window-rotate-downwards)
+  (keymap-set eat-mode-map "C-w W" 'evil-window-prev)
+  (keymap-set eat-mode-map "C-w w" 'evil-window-next)
+  (keymap-set eat-mode-map "C-w s" 'evil-window-split)
+  (keymap-set eat-mode-map "C-w v" 'evil-window-vsplit)
+  (keymap-set eat-mode-map "C-w _" 'evil-window-set-height)
+  (keymap-set eat-mode-map "C-w |" 'evil-window-set-width)
+  (keymap-set eat-mode-map "C-w c" 'evil-window-delete)
+  (keymap-set eat-mode-map "C-w n" 'evil-window-new)
+  (keymap-set eat-mode-map "C-w o" 'delete-other-windows)
+  (keymap-set eat-mode-map "C-w p" 'evil-window-mru)
+  (keymap-set eat-mode-map "C-w q" 'evil-quit)
+  (keymap-set eat-mode-map "C-w N" 'my-eat-emacs-mode)
+  (keymap-set eat-mode-map "C-\\ C-n" 'my-eat-emacs-mode)
+  (keymap-set eat-mode-map "C-\\ C-p" 'eat-send-password)
+  (keymap-set eat-mode-map "C-w \"" 'eat-yank)
+  (keymap-set eat-mode-map "C-x b" 'switch-to-buffer)
+  (keymap-set eat-mode-map "C-x k" 'my-eat-end)
+  (keymap-set eat-mode-map "C-x p" 'eat-send-password)
+  (evil-emacs-state)
+  (goto-char (point-max)))
+
+(defun my-eat-start ()
+  "Start Eat in the current project root directory in another window."
+  (interactive)
+  (require 'project)
+  (require 'eat)
+  (let* ((proj (project-current nil)))
+    (if proj (let* ((default-directory (project-root proj))
+                    (eat-buffer-name (project-prefixed-buffer-name "eat")))
+               (eat-other-window)
+               (switch-to-buffer eat-buffer-name)
+               (my-eat-semi-char-mode))
+      (progn (eat-other-window)
+             (switch-to-buffer eat-buffer-name)
+             (my-eat-semi-char-mode)))))
+#+end_src
+
+Eat also provides great color support; however, if ~.bashrc~ is making some color settings
+based on the terminal name, the file needs to be modified.
+
+#+begin_src sh
+### Color support
+case "${TERM}" in
+    xterm-color|*-256color|foot|*-truecolor)
+        echo Making color settings...
+        ;;
+    ,*)
+        echo :(
+        ;;
+esac
+
+if [ -n "$EAT_SHELL_INTEGRATION_DIR" ]; then
+    if [ -r "$EAT_SHELL_INTEGRATION_DIR/bash" ]; then
+        # shellcheck source=/dev/null
+        source "$EAT_SHELL_INTEGRATION_DIR/bash"
+    fi
+fi
+#+end_src
+
+One nice thing about eat is that it can communicate with Emacs. With a few modifications,
+eat can open a file inside the host Emacs. With this change the command ~_eat_msg open~ will open
+a file in Emacs.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my-eat-open (file)
+  "Helper function to open files from eat terminal."
+  (if (file-exists-p file)
+      (find-file-other-window file t)
+    (warn "File doesn't exist")))
+
+(add-to-list 'eat-message-handler-alist (cons "open" 'my-eat-open))
+#+end_src
+
+And for ease of use, the command can be aliased toe ~emopen~ in ~.bashrc~.
+
+#+begin_src sh
+alias emopen='_eat_msg open'
+#+end_src
